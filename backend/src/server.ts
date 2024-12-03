@@ -1,10 +1,13 @@
 import express, { Request, Response, NextFunction } from "express";
 import connectDB from "./config/db";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import cors from "cors";
 import loginRoute from "./routes/baro-login-route";
-import { authenticateToken } from "./middleware/auth";
 import cookieParser from "cookie-parser"; // Cookie-parser'ı import ediyoruz
+import lawyerRoute from "./routes/lawyer-route"
+import digitalArchiveRoutes from "./routes/digital-archive-route";
+import complaintReasonRoutes from "./routes/complaint-reason-route";
+import eventCategoryRoutes from "./routes/event-category-route";
 
 dotenv.config();
 
@@ -12,7 +15,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "https://live-interview-delta.vercel.app", process.env.WEB_URL || "https://live-interview-web.vercel.app" ],
+    origin: [process.env.FRONTEND_URL || "http://localhost:5173"],
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Credentials ile ilgili isteklere izin ver
@@ -31,6 +34,10 @@ app.get("/", (req: Request, res: Response) => {
 
 // API rotaları
 app.use("/api/login", loginRoute);
+app.use("/api/lawyer", lawyerRoute);
+app.use("/api/digital-archives", digitalArchiveRoutes);
+app.use("/api/complaint-reasons", complaintReasonRoutes);
+app.use("/api/event-categories", eventCategoryRoutes);
 
 // Hataları yakalayan middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

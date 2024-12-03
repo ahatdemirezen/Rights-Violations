@@ -1,10 +1,10 @@
 import express from "express";
-import { createUser ,  logoutUser , refreshAccessToken} from "../controllers/baro-login-controller";
+import { LoginControl ,  logoutUser , refreshAccessToken} from "../controllers/login-controller";
 
 const router = express.Router();
 
 // POST isteği için rota
-router.post("/", createUser);
+router.post("/", LoginControl);
 
 router.post("/logout", logoutUser);
 

@@ -9,6 +9,7 @@ export interface ILawsuitTracking extends Document {
   fileNumber: string; // Dosya No
   court: string; // Mahkeme
   indictmentUrl?: string | null; // İddianame için S3 URL (optional)
+  files?: Types.ObjectId[]; // Reference to File schema
   createdAt?: Date; // Automatically added timestamp
   updatedAt?: Date; // Automatically updated timestamp
 }
@@ -27,6 +28,12 @@ const LawsuitTrackingSchema = new Schema<ILawsuitTracking>(
     fileNumber: { type: String, required: true }, // Dosya No
     court: { type: String, required: true }, // Mahkeme
     indictmentUrl: { type: String, default: null }, // İddianame için S3 URL
+    files: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'File', // Reference to File model
+        },
+      ], // Dosyalar (birden fazla dosya referansı)
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

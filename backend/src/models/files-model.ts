@@ -5,6 +5,7 @@ export enum FileType {
   HearingReport = 'Hearing Report', // Duruşma İzleme Raporu
   Petition = 'Petition', // Dilekçeler
   HearingMinutes = 'Hearing Minutes', // Duruşma Tutanakları
+  Indictment = 'Indictment', // İddianame
 }
 
 // Interface for the File schema

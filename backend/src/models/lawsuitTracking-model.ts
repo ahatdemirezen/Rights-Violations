@@ -2,13 +2,14 @@ import { Schema, model, Document , Types } from 'mongoose';
 
 // Interface for the case tracking schema
 export interface ILawsuitTracking extends Document {
-  partyName: string; // Taraf Adı Soyadı
-  oppositLawyer?: string | null; // Avukat (optional)
-  applicationNumber: Types.ObjectId; // Reference to Application schema
+  applicationId: Types.ObjectId; // Reference to Application schema
+  applicationNumber: number; // Başvuru numarası
+  applicantName: string;
+  courtFileNo: string;
   caseSubject: string; // Dava Konusu
+  lawyer?: string | null; // Davayı Takip Eden Avukat
   fileNumber: string; // Dosya No
   court: string; // Mahkeme
-  indictmentUrl?: string | null; // İddianame için S3 URL (optional)
   files?: Types.ObjectId[]; // Reference to File schema
   createdAt?: Date; // Automatically added timestamp
   updatedAt?: Date; // Automatically updated timestamp
@@ -17,17 +18,25 @@ export interface ILawsuitTracking extends Document {
 // Define the Mongoose schema
 const LawsuitTrackingSchema = new Schema<ILawsuitTracking>(
     {
-    partyName: { type: String, required: true }, // Taraf Adı Soyadı
-    oppositLawyer: { type: String, default: null }, // Avukat
-    applicationNumber: {
-        type: Schema.Types.ObjectId, // ObjectId olarak ayarlandı
-        ref: 'Application', // Reference to the Application model
+      applicationId: {  
+        type: Schema.Types.ObjectId, // `ObjectId` olarak ayarlandı
+        ref: 'Application', // `Application` modeline referans
         required: true,
-      }, // Başvuru No (Reference to Application)    
-    caseSubject: { type: String, required: true }, // Dava Konusu
-    fileNumber: { type: String, required: true }, // Dosya No
-    court: { type: String, required: true }, // Mahkeme
-    indictmentUrl: { type: String, default: null }, // İddianame için S3 URL
+      },
+      applicationNumber: {
+        type: Number, // Başvuru numarası, `Application` modelinden alınacak
+        required: true,
+      },
+      applicantName: {
+        type : String,
+        required: true,
+      },
+    courtFileNo: { type: String , required: false },
+    caseSubject: { type: String, required: false }, // Dava Konusu
+    lawyer: { type: String, default: null }, // Davayı Takip Eden Avukat
+
+    fileNumber: { type: String, required: false }, // Dosya No
+    court: { type: String, required: false }, // Mahkeme
     files: [
         {
           type: Schema.Types.ObjectId,

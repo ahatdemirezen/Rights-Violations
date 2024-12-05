@@ -1,53 +1,57 @@
-import { Schema, model, Document , Types } from 'mongoose';
+import { Schema, model, Document, Types } from "mongoose";
 
-// Interface for the application (request) schema
+// Interface for the Application schema
 export interface IApplication extends Document {
-  applicationNumber: number;
-  applicantName: string;
-  nationalID: string;
-  applicantType: 'organization' | 'individual';
-  organizationName?: string | null; // Can be null
-  applicationDate: Date;
-  complaintReason?: Types.ObjectId | null; // Reference to ComplaintReason
-  description?: string; // Description field instead of applicationCategory
-  status: 'approved' | 'pending' | 'rejected';
-  receivingApplication?: string | null; // Can be null
-  Lawyer?: string | null;
-  documents?: Array<{
-    documentUrl: string; // URL of the document stored in S3
-    documentDescription: string; // Description of the document
-  }>; // List of related documents
+  applicationNumber: number; // Başvuru numarası
+  receivedBy?: string 
+  applicantName: string; // Başvuru sahibinin adı
+  nationalID: string; // T.C. Kimlik No
+  applicationType: "organization" | "individual"; // Başvuru türü
+  applicationDate: Date; // Başvuru tarihi
+  address: string; // Adres
+  phoneNumber: string; // Telefon numarası
+  complaintReason: string; // Yakınma veya ihlal nedenleri
+  eventCategories: Types.ObjectId[]; // Olay kategorileri referansı
+  documents: Types.ObjectId[]; // Doküman referansları (Document modeli)
+  status: "approved" | "pending" | "rejected"; // Başvuru durumu
+  organizationName?: string; // Kurum adı (Sadece "organization" türü için zorunlu)
 }
 
 // Define the Mongoose schema
 const ApplicationSchema = new Schema<IApplication>(
   {
     applicationNumber: { type: Number, required: true, unique: true },
+    receivedBy: { type: String, default: null },
     applicantName: { type: String, required: true },
     nationalID: { type: String, required: true, unique: true, minlength: 11, maxlength: 11 },
-    applicantType: { type: String, enum: ['organization', 'individual'], required: true },
-    organizationName: { type: String, default: null }, // Default set to null
-    applicationDate: { type: Date, required: true },
-    complaintReason: {
-        type: Schema.Types.ObjectId,
-        ref: 'ComplaintReason', // Reference to the ComplaintReason model
-        default: null,
+    applicationType: { type: String, enum: ["organization", "individual"], required: true },
+    organizationName: {
+      type: String,
+      required: function (this: IApplication) {
+        return this.applicationType === "organization"; // Kurum adı sadece "organization" türünde zorunlu
       },
-    description: { type: String }, // New field added for description
-    status: { type: String, enum: ['approved', 'pending', 'rejected'], required: true },
-    receivingApplication: { type: String, default: null }, // Default set to null
-    Lawyer: { type: String , default: null },
+    },
+    applicationDate: { type: Date, required: true },
+    address: { type: String, required: true },
+    phoneNumber: { type: String, required: true },
+    complaintReason: { type: String, required: true },
+    eventCategories: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "EventCategory", // Olay kategorisi referansı
+      },
+    ],
     documents: [
-        {
-          documentUrl: { type: String, required: true }, // Document URL (e.g., S3 link)
-          documentDescription: { type: String, required: true }, // Document description
-        },
-      ], // Array of documents with URLs and descriptions
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Document", // Document modeline referans
+      },
+    ],
+    status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" }, // Başvuru durumu
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields automatically
+    timestamps: true, // createdAt ve updatedAt otomatik olarak eklenir
   }
 );
 
-// Create and export the model
-export const ApplicationModel = model<IApplication>('Application', ApplicationSchema);
+export const ApplicationModel = model<IApplication>("Application", ApplicationSchema);

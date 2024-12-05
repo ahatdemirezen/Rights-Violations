@@ -2,8 +2,9 @@
 import axios from 'axios';
 import { useAuthStore } from './LoginStore';
 
-const apiUrl = import.meta.env.VITE_BE_URL; // Base URL'niz varsa buraya ekleyin
+// For Extra Security
 
+const apiUrl = import.meta.env.VITE_BE_URL; // Base URL'niz varsa buraya ekleyin
 // Axios instance oluşturun
 const axiosInstance = axios.create({
   baseURL: apiUrl, // Tüm istekler için temel URL

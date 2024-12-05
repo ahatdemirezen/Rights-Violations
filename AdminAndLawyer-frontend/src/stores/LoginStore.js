@@ -8,9 +8,9 @@ export const useAuthStore = create((set) => ({
   isAuthenticated: localStorage.getItem("auth") === "true",
   error: null,
   
-  login: async (email, password) => {
+  login: async (name, password) => {
     try {
-      const response = await axios.post(`${apiUrl}/login`, { email, password }, { withCredentials: true });
+      const response = await axios.post(`${apiUrl}/login`, {name, password }, { withCredentials: true });
 
       if (response) {
         localStorage.setItem("auth", true);

@@ -2,9 +2,7 @@ import { Schema, model, Document , Types } from 'mongoose';
 
 // Interface for the Lawsuit Information schema
 export interface ILawsuitInformation extends Document {
-  fileNumber: Types.ObjectId; // Reference to LawsuitTracking schema
-  court: string; // Mahkeme
-  courtFileNumber: string; // Mahkeme Dosya No
+  lawsuitTrackinId: Types.ObjectId; // Reference to LawsuitTracking schema
   resultDescription?: string; // Sonucu Açıklama (optional)
   resultStage?: string; // Sonucu Aşama (optional)
   createdAt?: Date; // Automatically added timestamp
@@ -14,13 +12,11 @@ export interface ILawsuitInformation extends Document {
 // Define the Mongoose schema
 const LawsuitInformationSchema = new Schema<ILawsuitInformation>(
   {
-    fileNumber: {
+    lawsuitTrackinId: {
         type: Schema.Types.ObjectId,
         ref: 'LawsuitTracking', // Reference to LawsuitTracking model
         required: true,
       }, // Dosya No, required and references LawsuitTracking  
-    court: { type: String, required: true }, // Mahkeme, required
-    courtFileNumber: { type: String, required: true }, // Mahkeme Dosya No, required
     resultDescription: { type: String, default: null }, // Sonucu Açıklama, optional
     resultStage: { type: String, default: null }, // Sonucu Aşama, optional
   },

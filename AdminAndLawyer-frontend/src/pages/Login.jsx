@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"; // Yönlendirme için
 import Image from "../assets/image.png"; // Resmi import edin
 
 const Login = () => {
-  const [email, setEmail] = useState(''); // E-mail input state
+  const [name, setName] = useState(''); // E-mail input state
   const [password, setPassword] = useState(''); // Şifre input state
   const [showPassword, setShowPassword] = useState(false); // Şifreyi gösterme durumu
   const navigate = useNavigate(); // Yönlendirme için useNavigate fonksiyonu
@@ -16,8 +16,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(email, password); // Zustand'daki login fonksiyonunu çağırıyoruz
-      navigate('/packages'); // Login başarılı olursa /packages sayfasına yönlendir
+      await login(name, password); // Zustand'daki login fonksiyonunu çağırıyoruz
+      navigate('/application'); // Login başarılı olursa /packages sayfasına yönlendir
     } catch (error) {
       console.error("Login failed:", error); // Hata varsa konsola yazdır
     }
@@ -43,14 +43,14 @@ const Login = () => {
           <form onSubmit={handleSubmit}> {/* Form submit */}
             <div className="mb-4">
               <label className="block text-sm text-gray-700 font-bold mb-2">
-                E-mail
+                Name Surname
               </label>
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                type="email"
-                placeholder="E-mail"
-                value={email} // Email input value
-                onChange={(e) => setEmail(e.target.value)} // Email state güncelleme
+                type="text"
+                placeholder="Name Surname"
+                value={name} // Name input value
+                onChange={(e) => setName(e.target.value)} // Name state güncelleme
               />
             </div>
             <div className="mb-6 relative">

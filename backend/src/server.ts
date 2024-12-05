@@ -6,8 +6,10 @@ import loginRoute from "./routes/baro-login-route";
 import cookieParser from "cookie-parser"; // Cookie-parser'ı import ediyoruz
 import lawyerRoute from "./routes/lawyer-route"
 import digitalArchiveRoutes from "./routes/digital-archive-route";
-import complaintReasonRoutes from "./routes/complaint-reason-route";
 import eventCategoryRoutes from "./routes/event-category-route";
+import lawsuitTrackingRoutes from "./routes/lawsuit-tracking-route"
+import lawsuitInformationRoutes from "./routes/lawsuit-information-route"
+import applicationRoutes from "./routes/application-route"
 
 dotenv.config();
 
@@ -36,8 +38,11 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/login", loginRoute);
 app.use("/api/lawyer", lawyerRoute);
 app.use("/api/digital-archives", digitalArchiveRoutes);
-app.use("/api/complaint-reasons", complaintReasonRoutes);
 app.use("/api/event-categories", eventCategoryRoutes);
+app.use("/api/lawsuittracking" , lawsuitTrackingRoutes)
+app.use("/api/lawsuitinformation" , lawsuitInformationRoutes)
+app.use('/api/applications', applicationRoutes);
+
 
 // Hataları yakalayan middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

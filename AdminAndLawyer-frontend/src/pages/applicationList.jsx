@@ -57,14 +57,18 @@ const ApplicationListPage = () => {
       console.error("Updated application is undefined or missing _id.");
       return;
     }
-
+  
     try {
       await updateApplication(updatedApplication._id, updatedApplication);
       console.log("Başvuru başarıyla güncellendi.");
+      
+      // Güncellenen listeyi yeniden yükleyin
+      await fetchApplications();
     } catch (err) {
       console.error("Güncelleme hatası:", err);
     }
   };
+  
 
   return (
     <div className="p-6">

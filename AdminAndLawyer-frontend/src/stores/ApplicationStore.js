@@ -27,6 +27,15 @@ const useApplicationStore = () => {
             formData.append("descriptions", file.description || "Belge");
             formData.append("types", file.type || "Other");
           });
+        } else if (key === "links" && Array.isArray(value) && value.length > 0) {
+          value.forEach((link, index) => {
+            formData.append(`links[${index}][documentSource]`, link.url || "");
+            formData.append(
+              `links[${index}][documentDescription]`,
+              link.description || ""
+            );
+            formData.append(`links[${index}][type]`, link.type || "Other");
+          });
         } else if (Array.isArray(value)) {
           value.forEach((item) => {
             formData.append(key, item);
@@ -53,6 +62,7 @@ const useApplicationStore = () => {
       setLoading(false);
     }
   };
+  
   
   const fetchApplications = async () => {
     setLoading(true);
@@ -105,7 +115,7 @@ const useApplicationStore = () => {
       // Text alanlarını ekleme
       Object.entries(updatedData).forEach(([key, value]) => {
         if (
-          !["files", "links", "eventCategories", "lawyer"].includes(key) &&
+          !["files", "links", "lawyer" , "eventCategories" ].includes(key) &&
           value !== undefined &&
           value !== null
         ) {
@@ -113,13 +123,16 @@ const useApplicationStore = () => {
         }
       });
   
-      // Event kategorileri (opsiyonel olarak) ekleme
-      if (Array.isArray(updatedData.eventCategories)) {
-        updatedData.eventCategories.forEach((categoryId, index) => {
-          formData.append(`eventCategories[${index}]`, categoryId);
-        });
-      }
-  
+        // EventCategories alanını string olarak ekleme
+    if (updatedData.eventCategories) {
+      const eventCategory =
+        Array.isArray(updatedData.eventCategories) &&
+        updatedData.eventCategories.length > 0
+          ? updatedData.eventCategories[0] // Array ise ilk elemanı al
+          : updatedData.eventCategories; // Değilse doğrudan ekle
+      formData.append("eventCategories", eventCategory);
+    }
+
       // Dosyaları ekleme
       if (Array.isArray(updatedData.files) && updatedData.files.length > 0) {
         updatedData.files.forEach((file, index) => {

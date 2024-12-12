@@ -36,7 +36,6 @@ const saveDocument = async (
   return savedDocument._id as Types.ObjectId;
 };
 
-
 // Yeni Başvuru Oluşturma
 export const createApplication = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -49,21 +48,38 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
       address,
       phoneNumber,
       complaintReason,
+      eventCategories, // eventCategories alındı
       links = [],
       descriptions = [],
       types = [],
     } = req.body;
 
     // Zorunlu Alan Kontrolü
-    if (!applicantName || !nationalID || !applicationType || !applicationDate) {
-       res.status(400).json({ error: "Zorunlu alanlar eksik!" });
-       return; // Fonksiyondan çık
+    if (!applicantName || !nationalID || !applicationType || !applicationDate || !eventCategories) {
+      res.status(400).json({ error: "Zorunlu alanlar eksik!" });
+      return; // Fonksiyondan çık
     }
 
+    // eventCategories doğrulama
+    const validCategories = [
+      "Aile ve Özel Yaşam Hakkı",
+      "Ayrımcılık",
+      "Basın Özgürlüğü",
+      "Kadına Karşı Şiddet ve Taciz",
+      "Çocuğa Karşı Şiddet ve Taciz",
+      "Örgütlenme Özgürlüğü",
+      "İşkence ve Kötü Muamele",
+      "Eğitim Hakkı",
+      "Düşünce ve İfade Özgürlüğü",
+    ];
+    if (!validCategories.includes(eventCategories)) {
+      res.status(400).json({ error: "Geçersiz eventCategories değeri!" });
+      return;
+    }
 
     const lastApplication = await ApplicationModel.findOne().sort({ applicationNumber: -1 });
     const applicationNumber = lastApplication ? lastApplication.applicationNumber + 1 : 1;
-        const documents: Types.ObjectId[] = [];
+    const documents: Types.ObjectId[] = [];
 
     // Dosyaları İşleme
     if (req.files) {
@@ -86,30 +102,30 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
           documents.push(documentId);
         } catch (error) {
           console.error("Dosya yüklenirken hata:", error);
-           res.status(500).json({ error: "Dosya yüklenemedi." });
+          res.status(500).json({ error: "Dosya yüklenemedi." });
         }
       }
     }
 
     // Linkleri İşleme
-if (links && links.length > 0) {
-  const parsedLinks = Array.isArray(links) ? links : [links];
-  for (const link of parsedLinks) {
-    const { documentDescription, type, documentSource } = link;
+    if (links && links.length > 0) {
+      const parsedLinks = Array.isArray(links) ? links : [links];
+      for (const link of parsedLinks) {
+        const { documentDescription, type, documentSource } = link;
 
-    if (!documentSource) {
-      res.status(400).json({ error: "Her link için 'documentSource' zorunludur." });
-      return;
+        if (!documentSource) {
+          res.status(400).json({ error: "Her link için 'documentSource' zorunludur." });
+          return;
+        }
+
+        const documentId = await saveDocument("link", {
+          description: documentDescription || "Link",
+          type: type || "Other",
+          source: documentSource,
+        });
+        documents.push(documentId);
+      }
     }
-
-    const documentId = await saveDocument("link", {
-      description: documentDescription || "Link",
-      type: type || "Other",
-      source: documentSource,
-    });
-    documents.push(documentId);
-  }
-}
 
     // Başvuru Oluşturma
     const newApplication = new ApplicationModel({
@@ -122,6 +138,7 @@ if (links && links.length > 0) {
       address,
       phoneNumber,
       complaintReason,
+      eventCategories, // eventCategories kaydediliyor
       documents,
     });
 
@@ -164,13 +181,11 @@ export const getApplicationById = async (req: Request, res: Response, next: Next
   const { id } = req.params;
 
   try {
-    // Başvuruyu veritabanından al ve detayları çek
-    const application = await ApplicationModel.findById(id)
-      .populate("eventCategories", "name")
-      .populate({
-        path: "documents",
-        select: "documents.documentUrl documents.documentDescription", // Alt belgeleri al
-      });
+    // Başvuruyu veritabanından al ve belgeleri populate et
+    const application = await ApplicationModel.findById(id).populate({
+      path: "documents",
+      select: "documents.documentUrl documents.documentDescription documents.documentSource", // Alt belgeleri al
+    });
 
     if (!application) {
       throw createHttpError(404, "Başvuru bulunamadı.");
@@ -181,6 +196,7 @@ export const getApplicationById = async (req: Request, res: Response, next: Next
       const docDetails = doc.documents[0]; // İlk alt belge
       return {
         documentUrl: docDetails?.documentUrl || "URL bulunamadı",
+        documentSource: docDetails?.documentSource || "", // documentSource'u ekliyoruz
         documentDescription: docDetails?.documentDescription || "Dosya",
       };
     });
@@ -196,6 +212,8 @@ export const getApplicationById = async (req: Request, res: Response, next: Next
     next(error);
   }
 };
+
+
 
 export const getDocumentTypes = async (req: Request, res: Response): Promise<void>  => {
   try {

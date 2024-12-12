@@ -16,7 +16,30 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
     documentUrl: "", // Link seçilirse kullanılacak
     documentDescription: "", // Açıklama alan
     lawyer: application.lawyer || "", // Avukat alanı (ID)
+    eventCategories: application.eventCategories || "", // Event kategorisi (string)
   });
+
+  const eventCategoriesOptions = [
+    "Aile ve Özel Yaşam Hakkı",
+    "Ayrımcılık",
+    "Basın Özgürlüğü",
+    "Kadına Karşı Şiddet ve Taciz",
+    "Çocuğa Karşı Şiddet ve Taciz",
+    "Örgütlenme Özgürlüğü",
+    "İşkence ve Kötü Muamele",
+    "Eğitim Hakkı",
+    "Düşünce ve İfade Özgürlüğü",
+  ];
+
+   // Event kategori seçimi için değişiklik işlemi
+   const handleEventCategoriesChange = (e) => {
+    const selectedCategory = e.target.value; // Seçilen kategori
+    setFormData((prev) => ({
+      ...prev,
+      eventCategories: selectedCategory, // Tek bir kategori olarak ayarla
+    }));
+  };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -120,6 +143,24 @@ useEffect(() => {
               className="w-full p-2 border border-gray-300 rounded"
             />
           </div>
+           {/* Olay Kategorisi */}
+           <div>
+            <label className="block text-gray-700">Olay Kategorisi:</label>
+            <select
+              name="eventCategories"
+              value={formData.eventCategories || ""}
+              onChange={handleEventCategoriesChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            >
+              <option value="">Kategori Seçin</option>
+              {eventCategoriesOptions.map((category, index) => (
+                <option key={index} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
 
           {/* Başvuruyu Alan Kişi */}
           {application && (
@@ -268,20 +309,33 @@ useEffect(() => {
     </div>
 ))}
 
-          <div>
-  <label className="block text-gray-700">Mevcut Dosyalar:</label>
+<div>
+  <label className="block text-gray-700">Mevcut Dosyalar ve Linkler:</label>
   {Array.isArray(s3Files) && s3Files.length > 0 ? (
     s3Files.map((file, index) => (
-      <div key={index} className="my-2">
-        {file.documentUrl ? (
+      <div key={index} className="my-2 p-2 border rounded bg-gray-100">
+        {/* Açıklama alanı */}
+        <p className="text-gray-700 font-semibold">
+          Açıklama: {file.documentDescription || `Dosya ${index + 1}`}
+        </p>
+        {/* DocumentSource veya DocumentUrl kontrolü */}
+        {file.documentSource ? (
+          <a
+            href={file.documentSource}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline"
+          >
+            Linki Görüntüle
+          </a>
+        ) : file.documentUrl ? (
           <a
             href={file.documentUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 underline"
           >
-            {file.documentDescription || `Dosya ${index + 1}`}
-
+            Dosyayı Görüntüle
           </a>
         ) : (
           <span className="text-red-500">URL bulunamadı</span>
@@ -289,9 +343,10 @@ useEffect(() => {
       </div>
     ))
   ) : (
-    <p className="text-gray-500">Mevcut dosya bulunamadı.</p>
+    <p className="text-gray-500">Mevcut dosya veya link bulunamadı.</p>
   )}
 </div>
+
 
 <div>
   <label className="block text-gray-700">Document Type:</label>

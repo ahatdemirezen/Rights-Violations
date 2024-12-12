@@ -37,7 +37,7 @@ const ApplicationSchema = new Schema<IApplication>(
     phoneNumber: { type: String, required: true },
     complaintReason: { type: String, required: true },
     eventCategories: {
-      type: String,
+      type: String, // Array of strings
       enum: [
         "Aile ve Özel Yaşam Hakkı",
         "Ayrımcılık",
@@ -50,7 +50,7 @@ const ApplicationSchema = new Schema<IApplication>(
         "Düşünce ve İfade Özgürlüğü",
       ],
       required: false,
-    },
+    },    
     documents: [
       {
         type: Schema.Types.ObjectId,

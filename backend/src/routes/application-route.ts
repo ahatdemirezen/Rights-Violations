@@ -5,6 +5,7 @@ import {
   getApplicationById,
   updateApplication,
   deleteApplication,
+  getDocumentTypes,
 } from "../controllers/application-controller";
 import multer from "multer";
 const router = express.Router();
@@ -16,7 +17,9 @@ router.get("/applications", getAllApplications);
 // ID'ye göre başvuru getirme
 router.get("/:id", getApplicationById);
 // Başvuru düzenleme
-router.put("/:id", updateApplication);
+router.put("/:id", upload.array("files"), updateApplication);
 // Başvuru silme
 router.delete("/:id", deleteApplication);
+
+router.get("/api/document-types", getDocumentTypes);
 export default router;

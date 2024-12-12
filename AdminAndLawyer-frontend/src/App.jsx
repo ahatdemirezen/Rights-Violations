@@ -1,34 +1,40 @@
 import React from "react";
-import Login from "./pages/Login";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import ApplicationList from "./pages/applicationList";
-import Sidebar from "./components/SideBar";
-import Header from "./components/Header";
-import LawyerList from "./pages/LawyerListPage"; // Avukat listesi bileşeni
+import Login from "./pages/Login";
+import AdminPanel from "./Layout/AdminPanel"; // Admin paneli
+import LawyerPanel from "./Layout/lawyerPanel"; // Lawyer paneli
+import ProtectedRoute from "./access-control/auth-controller"; // ProtectedRoute bileşenini import et
 
 const App = () => {
   return (
     <Router>
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <Sidebar />
+      <Routes>
+        {/* Varsayılan yönlendirme */}
+        <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Main Content */}
-        <div className="flex-grow flex flex-col">
-          {/* Header */}
-          <Header />
+        {/* Login rotası */}
+        <Route path="/login" element={<Login />} />
 
-          {/* Routes */}
-          <div className="flex-grow overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<Navigate to="/login" />} /> {/* Ana yönlendirme */}
-              <Route path="/login" element={<Login />} /> {/* Login rotası */}
-              <Route path="/application" element={<ApplicationList />} /> {/* Application listesi rotası */}
-              <Route path="/lawyers" element={<LawyerList />} /> {/* Avukat listesi rotası */}
-            </Routes>
-          </div>
-        </div>
-      </div>
+        {/* Admin Paneli */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Lawyer Paneli */}
+        <Route
+          path="/lawyer/*"
+          element={
+            <ProtectedRoute>
+              <LawyerPanel />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </Router>
   );
 };

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document , Types} from 'mongoose';
 
 // Enum for user roles
 export enum UserRole {
@@ -11,6 +11,7 @@ export enum Gender {
 }
 // Interface for the user schema
 export interface IUser extends Document {
+  _id: Types.ObjectId; // or string
   roles: UserRole[]; // User roles (can have multiple roles)
   name: string; // Full name (name and surname)
   password: string; // Password for authentication

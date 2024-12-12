@@ -1,97 +1,156 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ApplicationModel } from "../models/application-model";
 import { DocumentModel } from "../models/document-model";
 import { deleteFileFromS3, uploadToS3 } from "../controllers/S3-controller";
 import { Types } from "mongoose"; // `Types` import edildi
-import { EventCategoryModel } from "../models/eventCategory-model";
+import mongoose from "mongoose";
 
-export const createApplication = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const {
-        applicantName,
-        nationalID,
-        applicationType,
-        applicationDate,
-        address,
-        phoneNumber,
-        complaintReason,
-        eventCategories,
-        organizationName,
-        links,
-      } = req.body;
-  
-      const descriptions = req.body.description; // Doküman açıklamaları (array olarak gelmeli)
-      const types = req.body.type; // Doküman türleri (array olarak gelmeli)
-      const files = req.files as Express.Multer.File[]; // Yüklenen dosyalar
-  
-      // Validasyon
-      if (!applicantName || !nationalID || !applicationType || !applicationDate) {
-        res.status(400).json({ error: "Başvuru için gerekli tüm alanları doldurmalısınız." });
-        return;
-      }
-  
-      if (applicationType === "organization" && !organizationName) {
-        res.status(400).json({ error: "Kurum başvuruları için kurum adı zorunludur." });
-        return;
-      }
-  
-      if (!descriptions || !types || (Array.isArray(descriptions) && Array.isArray(types) && descriptions.length !== types.length)) {
-        res.status(400).json({ error: "Açıklama ve tür alanları eksik veya uyumsuz." });
-        return;
-    }
-    
-      const applicationNumber = await ApplicationModel.countDocuments() + 1;
-      const savedDocuments = await processDocuments(descriptions, types, files,links);
+import { UserModel ,UserRole } from "../models/user-model";
 
-      
-  // EventCategory isimlerini ObjectId'lere dönüştürme
-  const categoryIds = await EventCategoryModel.find({
-    name: { $in: eventCategories },
-  }).select("_id name");
-  
-  if (!categoryIds || categoryIds.length === 0) {
-    res.status(400).json({ error: "Hiçbir kategori ismi bulunamadı." });
-    return;
+// Yardımcı Fonksiyon: DocumentModel Kaydet
+const saveDocument = async (
+  documentType: "files" | "link",
+  documentData: {
+    description: string;
+    type: string;
+    url?: string;
+    source?: string;
   }
+): Promise<Types.ObjectId> => {
+  const { description, type, url, source } = documentData;
+  console.log("saveDocument çağrıldı:", documentType, documentData);
 
-      const newApplication = new ApplicationModel({
-        applicationNumber,
-        applicantName,
-        nationalID,
-        applicationType,
-        organizationName: applicationType === "organization" ? organizationName : undefined,
-        applicationDate,
-        address,
-        phoneNumber,
-        complaintReason,
-      eventCategories: categoryIds.map((cat) => cat._id), // ObjectId'leri kullan
-        documents: savedDocuments,
-      });
-  
-      const savedApplication = await newApplication.save();
-  
-      res.status(201).json({ message: "Başvuru başarıyla oluşturuldu.", application: savedApplication });
-    } catch (error: any) {
-      console.error("Hata:", error.message);
-      res.status(500).json({ error: "Başvuru oluşturulurken hata oluştu.", details: error.message });
-    }
+  const documentObject = {
+    documentType,
+    documentDescription: description,
+    type,
+    ...(documentType === "files" && url ? { documentUrl: url } : {}),
+    ...(documentType === "link" && source ? { documentSource: source } : {}),
   };
-  
-// Tüm başvuruları listeleme (GET)
+
+  const newDocument = new DocumentModel({
+    documents: [documentObject],
+  });
+
+  const savedDocument = await newDocument.save();
+  return savedDocument._id as Types.ObjectId;
+};
+
+
+// Yeni Başvuru Oluşturma
+export const createApplication = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      applicantName,
+      receivedBy,
+      nationalID,
+      applicationType,
+      applicationDate,
+      address,
+      phoneNumber,
+      complaintReason,
+      links = [],
+      descriptions = [],
+      types = [],
+    } = req.body;
+
+    // Zorunlu Alan Kontrolü
+    if (!applicantName || !nationalID || !applicationType || !applicationDate) {
+       res.status(400).json({ error: "Zorunlu alanlar eksik!" });
+       return; // Fonksiyondan çık
+    }
+
+
+    const lastApplication = await ApplicationModel.findOne().sort({ applicationNumber: -1 });
+    const applicationNumber = lastApplication ? lastApplication.applicationNumber + 1 : 1;
+        const documents: Types.ObjectId[] = [];
+
+    // Dosyaları İşleme
+    if (req.files) {
+      const uploadedFiles = Array.isArray(req.files) ? req.files : [req.files];
+      for (let i = 0; i < uploadedFiles.length; i++) {
+        const file = uploadedFiles[i] as Express.Multer.File;
+        const description = Array.isArray(descriptions) ? descriptions[i] : descriptions || `Document ${i + 1}`;
+        const type = Array.isArray(types) ? types[i] : "Other";
+
+        try {
+          const s3Response = await uploadToS3(file);
+          const documentUrl = s3Response.files?.[0]?.url;
+          if (!documentUrl) throw new Error("S3 URL alınamadı.");
+
+          const documentId = await saveDocument("files", {
+            description,
+            type,
+            url: documentUrl,
+          });
+          documents.push(documentId);
+        } catch (error) {
+          console.error("Dosya yüklenirken hata:", error);
+           res.status(500).json({ error: "Dosya yüklenemedi." });
+        }
+      }
+    }
+
+    // Linkleri İşleme
+if (links && links.length > 0) {
+  const parsedLinks = Array.isArray(links) ? links : [links];
+  for (const link of parsedLinks) {
+    const { documentDescription, type, documentSource } = link;
+
+    if (!documentSource) {
+      res.status(400).json({ error: "Her link için 'documentSource' zorunludur." });
+      return;
+    }
+
+    const documentId = await saveDocument("link", {
+      description: documentDescription || "Link",
+      type: type || "Other",
+      source: documentSource,
+    });
+    documents.push(documentId);
+  }
+}
+
+    // Başvuru Oluşturma
+    const newApplication = new ApplicationModel({
+      applicationNumber,
+      applicantName,
+      receivedBy, // Başvuruyu alan kişi ekleniyor
+      nationalID,
+      applicationType,
+      applicationDate,
+      address,
+      phoneNumber,
+      complaintReason,
+      documents,
+    });
+
+    const savedApplication = await newApplication.save();
+    const populatedApplication = await ApplicationModel.findById(savedApplication._id).populate("documents");
+
+    res.status(201).json({
+      message: "Başvuru başarıyla oluşturuldu.",
+      application: populatedApplication,
+    });
+  } catch (error) {
+    console.error("Başvuru oluşturulurken hata:", error);
+    res.status(500).json({ error: "Başvuru oluşturulurken hata oluştu." });
+  }
+};
+
+
 export const getAllApplications = async (req: Request, res: Response): Promise<void> => {
   try {
     const { documentType } = req.query;
 
     const documentFilter = documentType ? { "documents.type": documentType } : {};
     const applications = await ApplicationModel.find(documentFilter)
-      .populate("eventCategories")
-      .populate({
-        path: "documents",
-        match: documentType ? { "documents.type": documentType } : {},
-      });
+      .populate("eventCategories", "name")
+      .populate("documents");
 
     if (!applications.length) {
-       res.status(404).json({ message: "Hiç başvuru bulunamadı." });
+      res.status(404).json({ message: "Hiç başvuru bulunamadı." });
+      return;
     }
 
     res.status(200).json({ applications });
@@ -101,78 +160,144 @@ export const getAllApplications = async (req: Request, res: Response): Promise<v
   }
 };
 
-// Tek başvuru getirme (GET)
-export const getApplicationById = async (req: Request, res: Response): Promise<void> => {
+export const getApplicationById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;
 
   try {
+    // Başvuruyu veritabanından al ve detayları çek
     const application = await ApplicationModel.findById(id)
-      .populate("eventCategories")
-      .populate("documents");
+      .populate("eventCategories", "name")
+      .populate({
+        path: "documents",
+        select: "documents.documentUrl documents.documentDescription", // Alt belgeleri al
+      });
 
     if (!application) {
-       res.status(404).json({ error: "Başvuru bulunamadı." });
+      throw createHttpError(404, "Başvuru bulunamadı.");
     }
 
-    res.status(200).json({ application });
+    // Documents içindeki bilgileri kontrol et
+    const s3Files = application.documents.map((doc: any) => {
+      const docDetails = doc.documents[0]; // İlk alt belge
+      return {
+        documentUrl: docDetails?.documentUrl || "URL bulunamadı",
+        documentDescription: docDetails?.documentDescription || "Dosya",
+      };
+    });
+
+    // Yanıtı döndür
+    res.status(200).json({
+      message: "Başvuru bilgileri başarıyla alındı.",
+      application: application.toObject(), // Başvuru verisi
+      s3Files, // S3 dosya bilgileri
+    });
   } catch (error: any) {
-    console.error("Hata:", error.message);
-    res.status(500).json({ error: "Başvuru getirilirken hata oluştu." });
+    console.error("Başvuru bilgileri getirilirken hata oluştu:", error);
+    next(error);
   }
 };
 
+export const getDocumentTypes = async (req: Request, res: Response): Promise<void>  => {
+  try {
+    // Sabit tür listesini tanımlayın
+    const documentTypes = [
+      "Media Screening",
+      "NGO Data",
+      "Bar Commissions",
+      "Public Institutions",
+      "Other",
+    ];
+
+    // Tür listesini dön
+    res.status(200).json({ documentTypes });
+  } catch (error) {
+    console.error("Hata:");
+    res.status(500).json({ error: "Dosya türleri alınamadı." });
+  }
+};
+
+
+
 export const updateApplication = async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-  
-    const {
-      applicantName,
-      nationalID,
-      receivedBy,
-      applicationType,
-      applicationDate,
-      address,
-      phoneNumber,
-      complaintReason,
-      eventCategories,
-      organizationName,
-    } = req.body;
-  
-    const descriptions = req.body.description; // Doküman açıklamaları (array olarak gelmeli)
-    const types = req.body.type; // Doküman türleri (array olarak gelmeli)
-    const files = req.files as Express.Multer.File[]; // Yüklenen dosyalar
-  
-    try {
-      const updatedFields: any = {
-        ...(applicantName && { applicantName }),
-        ...(nationalID && { nationalID }),
-        ...(receivedBy && { receivedBy }),
-        ...(applicationType && { applicationType }),
-        ...(applicationType === "organization" && organizationName && { organizationName }),
-        ...(applicationType === "individual" && { organizationName: undefined }),
-        ...(applicationDate && { applicationDate }),
-        ...(address && { address }),
-        ...(phoneNumber && { phoneNumber }),
-        ...(complaintReason && { complaintReason }),
-        ...(eventCategories && { eventCategories: JSON.parse(eventCategories) }),
-      };
-  
-      if (descriptions && types && descriptions.length === types.length) {
-        updatedFields.documents = await processDocuments(descriptions, types, files);
-      }
-  
-      const updatedApplication = await ApplicationModel.findByIdAndUpdate(id, updatedFields, {
-        new: true,
-        runValidators: true,
-      });
-  
-      res.status(200).json({ message: "Başvuru başarıyla güncellendi.", application: updatedApplication });
-    } catch (error: any) {
-      console.error("Hata:", error.message);
-      res.status(500).json({ error: "Başvuru güncellenirken hata oluştu.", details: error.message });
+  const { id } = req.params;
+
+  try {
+    // Gelen veriyi kontrol edin
+    console.log("Gelen Body:", req.body);
+    console.log("Gelen Files:", req.files);
+
+    const updatedFields = { ...req.body };
+
+    // Mevcut başvuruyu veritabanından alın
+    const existingApplication = await ApplicationModel.findById(id).populate("documents");
+    if (!existingApplication) {
+      res.status(404).json({ error: "Başvuru bulunamadı." });
+      return;
     }
-  };
-  
-// Başvuru silme (DELETE)
+
+    let existingDocuments = existingApplication.documents as any[];
+
+    // Dosyaları işleyin ve yeni belgeleri ekleyin
+    if (req.files && Array.isArray(req.files)) {
+      const newDocumentIds = await processDocuments(
+        req.body.descriptions || [],
+        req.body.types || [],
+        req.files as Express.Multer.File[],
+        req.body.links || []
+      );
+
+      // Mevcut ve yeni belgeleri birleştir
+      existingDocuments = [...existingDocuments, ...newDocumentIds];
+    }
+
+    // Güncellenmiş belgeleri ekleyin
+    updatedFields.documents = existingDocuments;
+
+    // Lawyer alanını kontrol edin ve ObjectId formatına çevirin
+    if (req.body.lawyer) {
+      const lawyerId = req.body.lawyer;
+      console.log("Gönderilen Lawyer ID:", lawyerId);
+      console.log("ObjectId geçerli mi:", mongoose.Types.ObjectId.isValid(lawyerId));
+      // Lawyer ID'sini ObjectId olarak kontrol edin
+      if (!mongoose.Types.ObjectId.isValid(lawyerId)) {
+        res.status(400).json({ error: "Geçerli bir avukat ID'si girilmelidir." });
+        return;
+      }
+
+      // Avukatın varlığını ve rolünü kontrol edin
+      const lawyer = await UserModel.findById(lawyerId);
+      if (!lawyer || !lawyer.roles.includes(UserRole.Lawyer)) {
+        res.status(400).json({ error: "Geçerli bir avukat ID'si girilmelidir." });
+        return;
+      }
+
+
+      // Lawyer ID'sini updatedFields'a ekleyin
+      updatedFields.lawyer = new mongoose.Types.ObjectId(lawyerId);
+    }
+
+    // Başvuruyu güncelleyin
+    const updatedApplication = await ApplicationModel.findByIdAndUpdate(
+      id,
+      updatedFields,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedApplication) {
+      res.status(404).json({ error: "Başvuru güncellenemedi. Belirtilen ID'ye sahip başvuru bulunamadı." });
+      return;
+    }
+
+    console.log("Güncellenmiş Başvuru:", updatedApplication);
+
+    res.status(200).json({ message: "Başvuru başarıyla güncellendi.", application: updatedApplication });
+  } catch (error: any) {
+    console.error("Hata oluştu:", error.message);
+    res.status(500).json({ error: "Başvuru güncellenirken hata oluştu.", details: error.message });
+  }
+};
+
+
 export const deleteApplication = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
@@ -180,8 +305,8 @@ export const deleteApplication = async (req: Request, res: Response): Promise<vo
     const application = await ApplicationModel.findById(id).populate("documents");
 
     if (!application) {
-       res.status(404).json({ error: "Başvuru bulunamadı." });
-       return;
+      res.status(404).json({ error: "Başvuru bulunamadı." });
+      return;
     }
 
     for (const documentId of application.documents) {
@@ -208,58 +333,58 @@ export const deleteApplication = async (req: Request, res: Response): Promise<vo
 };
 
 const processDocuments = async (
-    descriptions: string | string[],
-    types: string | string[],
-    files: Express.Multer.File[],
-    links: string | string[] = [] // Linkler için ek bir parametre
+  descriptions: { files: string[]; links: string[] },
+  types: { files: string[]; links: string[] },
+  files: Express.Multer.File[],
+  links: string[] = []
 ): Promise<Types.ObjectId[]> => {
-    const savedDocuments: Types.ObjectId[] = [];
-    const descriptionsArray = Array.isArray(descriptions) ? descriptions : [descriptions];
-    const typesArray = Array.isArray(types) ? types : [types];
-    const linksArray = Array.isArray(links) ? links : [links];
+  const savedDocuments: Types.ObjectId[] = [];
 
-    // Dosyaları işleyelim
-    for (let i = 0; i < files.length; i++) {
-        const description = descriptionsArray[i] || `Document ${i + 1}`;
-        const type = typesArray[i] || "Other";
+  // Dosyaları İşle
+  for (let i = 0; i < files.length; i++) {
+    const description = descriptions.files[i] || `Document ${i + 1}`;
+    const type = types.files[i] || "Other";
 
-        if (!["Media Screening", "NGO Data", "Bar Commissions", "Public Institutions", "Other"].includes(type)) {
-            throw new Error("Geçersiz doküman türü. Geçerli türler: Media Screening, NGO Data, Bar Commissions, Public Institutions, Other.");
-        }
+    const s3Response = await uploadToS3(files[i]);
+    const documentUrl = s3Response.files[0]?.url;
 
-        const s3Response = await uploadToS3(files[i]);
-        const documentUrl = s3Response.files[0]?.url;
+    const newDocument = new DocumentModel({
+      documents: [{ documentDescription: description, type, documentUrl }],
+    });
 
-        if (!documentUrl) {
-            throw new Error("Dosya yükleme başarısız oldu.");
-        }
+    const savedDocument = await newDocument.save();
+    savedDocuments.push(savedDocument._id as Types.ObjectId);
+  }
 
-        const newDocument = new DocumentModel({
-            documents: [{ documentDescription: description, type, documentUrl }],
-        });
+  // Linkleri İşle
+  for (let i = 0; i < links.length; i++) {
+    const description = descriptions.links[i] || `Link ${i + 1}`;
+    const type = types.links[i] || "Other";
 
-        const savedDocument = await newDocument.save();
-        savedDocuments.push(savedDocument._id as Types.ObjectId);
-    }
+    const documentUrl = links[i];
+    if (!documentUrl) continue; // Boş link varsa atla
 
-    // Linkleri işleyelim
-    for (let i = 0; i < linksArray.length; i++) {
-        const description = descriptionsArray[files.length + i] || `Link ${i + 1}`;
-        const type = typesArray[files.length + i] || "Other";
+    const newDocument = new DocumentModel({
+      documents: [
+        {
+          documentType: "link",
+          documentSource: documentUrl,
+          documentUrl,
+          documentDescription: description,
+          type,
+        },
+      ],
+    });
 
-        if (!["Media Screening", "NGO Data", "Bar Commissions", "Public Institutions", "Other"].includes(type)) {
-            throw new Error("Geçersiz doküman türü. Geçerli türler: Media Screening, NGO Data, Bar Commissions, Public Institutions, Other.");
-        }
+    const savedDocument = await newDocument.save();
+    savedDocuments.push(savedDocument._id as Types.ObjectId);
+  }
 
-        const documentUrl = linksArray[i];
-
-        const newDocument = new DocumentModel({
-            documents: [{ documentDescription: description, type, documentUrl }],
-        });
-
-        const savedDocument = await newDocument.save();
-        savedDocuments.push(savedDocument._id as Types.ObjectId);
-    }
-
-    return savedDocuments;
+  return savedDocuments;
 };
+
+
+function createHttpError(arg0: number, arg1: string) {
+  throw new Error("Function not implemented.");
+}
+

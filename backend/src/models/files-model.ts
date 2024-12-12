@@ -21,9 +21,9 @@ const FileSchema = new Schema<IFile>(
     fileType: {
       type: String,
       enum: Object.values(FileType), // Restrict file type to specific values
-      required: true,
+      required: false,
     },
-    fileUrl: { type: String, required: true }, // File URL (e.g., S3 link)
+    fileUrl: { type: String, required: false }, // File URL (e.g., S3 link)
     description: { type: String, default: null }, // Optional description
   },
   {

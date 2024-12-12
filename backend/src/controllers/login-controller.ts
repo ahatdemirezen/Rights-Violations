@@ -14,38 +14,48 @@ const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET; // Refresh token için 
 const jwtRefreshExpiresIn = "1d"; // Refresh token süresi 1 gün
 
 // Access token oluşturma
-const createAccessToken = (name: string, role: string) => {
-  return jwt.sign({ name, role }, jwtSecret!, { expiresIn: jwtExpiresIn });
-};
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
-// Refresh token oluşturma
-const createRefreshToken = (name: string, role: string) => {
-  return jwt.sign({ name, role }, jwtRefreshSecret!, { expiresIn: jwtRefreshExpiresIn });
+const createAccessToken = (userId: string, name: string, roles: string[]) => {
+  if (!jwtSecret) throw new Error("JWT secret not found");
+  return jwt.sign({ userId, name, roles }, jwtSecret, { expiresIn: jwtExpiresIn });
 };
 
+// Refresh token oluşturma
+const createRefreshToken = (userId: string, name: string, roles: string[]) => {
+  if (!jwtRefreshSecret) throw new Error("JWT refresh secret not found");
+  return jwt.sign({ userId, name, roles }, jwtRefreshSecret, { expiresIn: jwtRefreshExpiresIn });
+};
+
+
 // Kullanıcı girişi
-export const LoginControl = async (req: Request, res: Response, next: NextFunction) => {
+export const LoginControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const { name, password } = req.body;
 
   try {
-    // Veritabanından kullanıcıyı kontrol et
+    // Kullanıcıyı veritabanında kontrol et
     const user = await UserModel.findOne({ name });
 
     if (!user) {
-      throw createHttpError(401, "User not found");
+      // Kullanıcı adı bulunamazsa hata fırlat
+      return res.status(404).json({
+        message: "User not found. Please check your username and try again.",
+      });
     }
 
     // Şifreyi kontrol et
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw createHttpError(401, "Invalid password");
+      // Şifre yanlışsa hata fırlat
+      return res.status(401).json({
+        message: "Invalid password. Please check your password and try again.",
+      });
     }
 
     // Access token ve refresh token oluştur
-    const accessToken = createAccessToken(user.name, user.roles[0]); // İlk rolü kullanıyoruz
-    const refreshToken = createRefreshToken(user.name, user.roles[0]);
+   const accessToken = createAccessToken(user._id.toString(), user.name, user.roles);
+const refreshToken = createRefreshToken(user._id.toString(), user.name, user.roles);
 
-    // Access token'ı HTTP-Only cookie olarak ekliyoruz
+
+    // Access token'ı HTTP-Only cookie olarak ekle
     res.cookie("token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -53,7 +63,7 @@ export const LoginControl = async (req: Request, res: Response, next: NextFuncti
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    // Refresh token'ı başka bir HTTP-Only cookie olarak ekliyoruz
+    // Refresh token'ı HTTP-Only cookie olarak ekle
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -61,15 +71,21 @@ export const LoginControl = async (req: Request, res: Response, next: NextFuncti
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
+    // Başarılı giriş mesajı
     res.status(200).json({
       message: "Login successful",
+      role: user.roles, // Kullanıcının rolünü frontend'e gönderiyoruz
+
     });
   } catch (error) {
+    // Beklenmeyen hata durumunda
     next(error);
   }
 };
 
+
 // Access token yenileme
+// Extra Security 
 export const refreshAccessToken = async (
   req: Request,
   res: Response,
@@ -79,14 +95,14 @@ export const refreshAccessToken = async (
 
   if (!refreshToken) {
     return res.status(401).json({ message: "No refresh token provided" });
-  }
+  } 
 
   try {
     // Refresh token doğrulama
-    const payload = jwt.verify(refreshToken, jwtRefreshSecret!) as { name: string; role: string };
+    const payload = jwt.verify(refreshToken, jwtRefreshSecret!) as { userId: string; name: string; roles: string[] };
 
     // Yeni access token oluşturma
-    const newAccessToken = createAccessToken(payload.name, payload.role);
+    const newAccessToken = createAccessToken(payload.userId, payload.name, payload.roles);
 
     // Yeni access token'ı HTTP-Only cookie olarak ekliyoruz
     res.cookie("token", newAccessToken, {
@@ -101,6 +117,7 @@ export const refreshAccessToken = async (
     next(error); // Hata durumunda next ile Express'e hatayı bildiriyoruz
   }
 };
+
 
 // Kullanıcı çıkışı
 export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {

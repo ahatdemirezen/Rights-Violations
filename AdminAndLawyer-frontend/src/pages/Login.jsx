@@ -11,17 +11,36 @@ const Login = () => {
 
   const login = useAuthStore((state) => state.login); // Zustand'dan login fonksiyonunu alıyoruz
   const error = useAuthStore((state) => state.error); // Zustand'dan error state'ini alıyoruz
-  
+
   // Form submit olduğunda login fonksiyonunu çağırıyoruz
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     try {
-      await login(name, password); // Zustand'daki login fonksiyonunu çağırıyoruz
-      navigate('/application'); // Login başarılı olursa /packages sayfasına yönlendir
+      await login(name, password); // Zustand'daki login fonksiyonunu çağır
+      const isAuthenticated = useAuthStore.getState().isAuthenticated;
+      const userRole = useAuthStore.getState().userRole; // Kullanıcı rolünü Zustand'dan al
+  
+      console.log("User Role after Login:", userRole); // Konsolda kontrol et
+  
+      if (isAuthenticated) {
+        if (userRole.includes("admin")) {
+          // Eğer userRole dizisi "admin" içeriyorsa
+          navigate('/admin/application'); // Admin için yönlendirme
+        } else if (userRole.includes("lawyer")) {
+          // Eğer userRole dizisi "lawyer" içeriyorsa
+          navigate('/lawyer/applications'); // Lawyer için yönlendirme
+        } else {
+          console.error("Unknown role:", userRole);
+        }
+      }
     } catch (error) {
-      console.error("Login failed:", error); // Hata varsa konsola yazdır
+      console.error("Login failed:", error);
     }
   };
+  
+  
+  
 
   return (
     <div className="flex h-screen">

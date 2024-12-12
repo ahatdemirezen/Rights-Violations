@@ -8,10 +8,11 @@ export interface IApplication extends Document {
   nationalID: string; // T.C. Kimlik No
   applicationType: "organization" | "individual"; // Başvuru türü
   applicationDate: Date; // Başvuru tarihi
+  lawyer: Types.ObjectId | null; // Avukat referansı (User şemasına bağlanır)
   address: string; // Adres
   phoneNumber: string; // Telefon numarası
   complaintReason: string; // Yakınma veya ihlal nedenleri
-  eventCategories: Types.ObjectId[]; // Olay kategorileri referansı
+  eventCategories: string; // Olay kategorileri referansı
   documents: Types.ObjectId[]; // Doküman referansları (Document modeli)
   status: "approved" | "pending" | "rejected"; // Başvuru durumu
   organizationName?: string; // Kurum adı (Sadece "organization" türü için zorunlu)
@@ -35,12 +36,21 @@ const ApplicationSchema = new Schema<IApplication>(
     address: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     complaintReason: { type: String, required: true },
-    eventCategories: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "EventCategory", // Olay kategorisi referansı
-      },
-    ],
+    eventCategories: {
+      type: String,
+      enum: [
+        "Aile ve Özel Yaşam Hakkı",
+        "Ayrımcılık",
+        "Basın Özgürlüğü",
+        "Kadına Karşı Şiddet ve Taciz",
+        "Çocuğa Karşı Şiddet ve Taciz",
+        "Örgütlenme Özgürlüğü",
+        "İşkence ve Kötü Muamele",
+        "Eğitim Hakkı",
+        "Düşünce ve İfade Özgürlüğü",
+      ],
+      required: false,
+    },
     documents: [
       {
         type: Schema.Types.ObjectId,
@@ -48,6 +58,11 @@ const ApplicationSchema = new Schema<IApplication>(
       },
     ],
     status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" }, // Başvuru durumu
+    lawyer: {
+      type: Schema.Types.ObjectId, // `User` modeline referans
+      ref: 'User', // `User` şemasına referans
+      default: null, // Atama yapılmazsa null olabilir
+    },
   },
   {
     timestamps: true, // createdAt ve updatedAt otomatik olarak eklenir

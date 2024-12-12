@@ -6,10 +6,11 @@ import loginRoute from "./routes/baro-login-route";
 import cookieParser from "cookie-parser"; // Cookie-parser'ı import ediyoruz
 import lawyerRoute from "./routes/lawyer-route"
 import digitalArchiveRoutes from "./routes/digital-archive-route";
-import eventCategoryRoutes from "./routes/event-category-route";
 import lawsuitTrackingRoutes from "./routes/lawsuit-tracking-route"
 import lawsuitInformationRoutes from "./routes/lawsuit-information-route"
 import applicationRoutes from "./routes/application-route"
+import applicationForLawyerRoutes from "./routes/applicationForLawyer-route"
+import lawsuitTrackingLawyerRoutes from "./routes/lawsuit-trackingForLawyer-route"
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const app = express();
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL || "http://localhost:5173"],
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Credentials ile ilgili isteklere izin ver
   })
@@ -38,11 +39,11 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/login", loginRoute);
 app.use("/api/lawyer", lawyerRoute);
 app.use("/api/digital-archives", digitalArchiveRoutes);
-app.use("/api/event-categories", eventCategoryRoutes);
 app.use("/api/lawsuittracking" , lawsuitTrackingRoutes)
 app.use("/api/lawsuitinformation" , lawsuitInformationRoutes)
 app.use('/api/applications', applicationRoutes);
-
+app.use('/api/lawyerapplication', applicationForLawyerRoutes )
+app.use('/api/lawyer-lawsuits' , lawsuitTrackingLawyerRoutes)
 
 // Hataları yakalayan middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

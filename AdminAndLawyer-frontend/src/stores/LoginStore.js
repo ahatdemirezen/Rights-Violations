@@ -7,10 +7,12 @@ export const useAuthStore = create((set) => ({
   token: null,
   isAuthenticated: localStorage.getItem("auth") === "true",
   error: null,
+  userRole: null, // Kullanıcı rolü için state
+
   
   login: async (name, password) => {
     try {
-      const response = await axios.post(`${apiUrl}/login`, {name, password }, { withCredentials: true });
+      const response = await axios.post(`${apiUrl}/login`, { name, password }, { withCredentials: true });
 
       if (response) {
         localStorage.setItem("auth", true);
@@ -19,12 +21,23 @@ export const useAuthStore = create((set) => ({
       set({
         isAuthenticated: true,
         error: null,
+        userRole: response.data.role, // Backend'den gelen role bilgisini kaydedin
+
       });
+      console.log("Set Role in Zustand:", response.data.role);
+
     } catch (error) {
+      const errorMessage = error.response && error.response.data.message 
+        ? error.response.data.message 
+        : 'An unexpected error occurred. Please try again.';
+      
+      // Hata durumunda kullanıcıya gösterilecek mesajı state'e kaydedin
       set({
         token: null,
         isAuthenticated: false,
-        error: error.response ? error.response.data.message : 'An error occurred',
+        error: errorMessage,
+        userRole: null, // Hata varsa rol bilgisini sıfırla
+
       });
     }
   },
@@ -34,7 +47,6 @@ export const useAuthStore = create((set) => ({
       const response = await axios.get(`${apiUrl}/login/refresh-token`, { withCredentials: true });
       
       if (response.status === 200) {
-
         set({
           isAuthenticated: true,
           error: null,
@@ -59,6 +71,8 @@ export const useAuthStore = create((set) => ({
       set({
         isAuthenticated: false,
         error: null,
+        userRole: null, // Çıkış yapıldığında rol bilgisini sıfırla
+
       });
     } catch (error) {
       set({
@@ -67,3 +81,4 @@ export const useAuthStore = create((set) => ({
     }
   },
 }));
+

@@ -100,3 +100,15 @@ export const getAllLawyersService = async (): Promise<any[]> => {
       updatedAt: lawyer.updatedAt,
     };
   };
+
+  export const getLawyerNameByUserIdService = async (userId: string): Promise<string | null> => {
+    try {
+      const lawyer = await UserModel.findById(userId, "name"); // Sadece name alanını getir
+      if (!lawyer) {
+        return null;
+      }
+      return lawyer.name; // Avukatın ismini döner
+    } catch (error) {
+      throw new Error("Error fetching lawyer name");
+    }
+  };

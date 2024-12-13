@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { createUserService , getAllLawyersService , deleteLawyerService , getLawyerByIdService} from '../services/lawyer-service';
+import { createUserService , getAllLawyersService , deleteLawyerService , getLawyerByIdService , getLawyerNameByUserIdService} from '../services/lawyer-service';
+import mongoose from 'mongoose';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
@@ -83,6 +84,42 @@ export const getLawyerById = async (req: Request, res: Response, next: NextFunct
       }
     } else {
       res.status(500).json({ message: 'Unknown error occurred' });
+    }
+  }
+};
+
+export const getLawyerNameByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  const userId = (req as any).user?.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID not found in request" });
+  }
+
+  // ObjectId doğrulama
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid user ID format" });
+  }
+
+  try {
+    const lawyerName = await getLawyerNameByUserIdService(userId);
+
+    if (!lawyerName) {
+      return res.status(404).json({ message: "Lawyer not found" });
+    }
+
+    res.status(200).json({
+      message: "Lawyer name fetched successfully",
+      name: lawyerName,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Unknown error occurred" });
     }
   }
 };

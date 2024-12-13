@@ -8,6 +8,8 @@ import LawsuitDetails from "../pages/LawsuitDetail"; // Yeni detay sayfası
 import LawsuitListPage from "../pages/LawsuitListPage"; // Davalar listesi bileşeni
 import LawsuitArchive from "../pages/LawsuitArchive"
 import CreateApplication from "../pages/CreateApplicationPage"
+import DcoumentArchive from "../pages/DocumentArchive"
+
 
 const AdminPanel = () => {
   return (
@@ -23,6 +25,7 @@ const AdminPanel = () => {
             <Route path="/lawsuit/:lawsuitId" element={<LawsuitDetails />} />
             <Route path="/archive/lawsuits" element={<LawsuitArchive />} />
             <Route path="/new-application" element={<CreateApplication />} />
+            <Route path="/archive/documents" element={<DcoumentArchive />} />
 
             {/* Diğer admin sayfaları */}
           </Routes>

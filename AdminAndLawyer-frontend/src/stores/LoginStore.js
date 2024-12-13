@@ -8,8 +8,8 @@ export const useAuthStore = create((set) => ({
   isAuthenticated: localStorage.getItem("auth") === "true",
   error: null,
   userRole: null, // Kullanıcı rolü için state
+  userName: null, // Kullanıcı adı için state
 
-  
   login: async (name, password) => {
     try {
       const response = await axios.post(`${apiUrl}/login`, { name, password }, { withCredentials: true });
@@ -17,14 +17,17 @@ export const useAuthStore = create((set) => ({
       if (response) {
         localStorage.setItem("auth", true);
       }
-      
+
+      // Kullanıcı verisini state'e kaydet
       set({
         isAuthenticated: true,
         error: null,
         userRole: response.data.role, // Backend'den gelen role bilgisini kaydedin
-
+        userName: response.data.name, // Backend'den gelen name bilgisini kaydedin
       });
+
       console.log("Set Role in Zustand:", response.data.role);
+      console.log("Set Name in Zustand:", response.data.name);
 
     } catch (error) {
       const errorMessage = error.response && error.response.data.message 
@@ -37,7 +40,7 @@ export const useAuthStore = create((set) => ({
         isAuthenticated: false,
         error: errorMessage,
         userRole: null, // Hata varsa rol bilgisini sıfırla
-
+        userName: null, // Hata varsa name bilgisini sıfırla
       });
     }
   },
@@ -72,7 +75,7 @@ export const useAuthStore = create((set) => ({
         isAuthenticated: false,
         error: null,
         userRole: null, // Çıkış yapıldığında rol bilgisini sıfırla
-
+        userName: null, // Çıkış yapıldığında name bilgisini sıfırla
       });
     } catch (error) {
       set({
@@ -81,4 +84,3 @@ export const useAuthStore = create((set) => ({
     }
   },
 }));
-

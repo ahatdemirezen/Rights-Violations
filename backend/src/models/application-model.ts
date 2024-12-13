@@ -16,6 +16,7 @@ export interface IApplication extends Document {
   documents: Types.ObjectId[]; // Doküman referansları (Document modeli)
   status: "approved" | "pending" | "rejected"; // Başvuru durumu
   organizationName?: string; // Kurum adı (Sadece "organization" türü için zorunlu)
+  lawsuitCreated?: boolean; // Arşiv durumu (true veya false)
 }
 
 // Define the Mongoose schema
@@ -67,6 +68,7 @@ const ApplicationSchema = new Schema<IApplication>(
       ref: 'User', // `User` şemasına referans
       default: null, // Atama yapılmazsa null olabilir
     },
+    lawsuitCreated: { type: Boolean, default: false }, // Dava oluşturulup oluşturulmadığını belirten alan
   },
   {
     timestamps: true, // createdAt ve updatedAt otomatik olarak eklenir

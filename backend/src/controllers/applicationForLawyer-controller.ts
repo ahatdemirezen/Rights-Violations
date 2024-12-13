@@ -54,6 +54,7 @@ export const getApplicationDetailsByLawyer = async (
     });
   } catch (error) {
     // Hata durumunda next ile error handler'a gönder
+    console.error("Başvuru detayları getirilirken hata oluştu:", error);
     next(error);
   }
 };

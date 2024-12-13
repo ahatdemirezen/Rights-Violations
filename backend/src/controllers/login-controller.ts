@@ -75,7 +75,7 @@ const refreshToken = createRefreshToken(user._id.toString(), user.name, user.rol
     res.status(200).json({
       message: "Login successful",
       role: user.roles, // Kullanıcının rolünü frontend'e gönderiyoruz
-
+      name: user.name,
     });
   } catch (error) {
     // Beklenmeyen hata durumunda

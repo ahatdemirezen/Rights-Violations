@@ -18,7 +18,6 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
     lawyer: application.lawyer || "", // Avukat alanı (ID)
     eventCategories: application.eventCategories || "", // Event kategorisi (string)
     organizationName: application.organizationName || "", // Kurum adı
-
   });
 
   const eventCategoriesOptions = [

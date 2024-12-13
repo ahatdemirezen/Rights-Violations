@@ -57,18 +57,17 @@ const ApplicationListPage = () => {
       console.error("Updated application is undefined or missing _id.");
       return;
     }
-  
+
     try {
       await updateApplication(updatedApplication._id, updatedApplication);
       console.log("Başvuru başarıyla güncellendi.");
-      
+
       // Güncellenen listeyi yeniden yükleyin
       await fetchApplications();
     } catch (err) {
       console.error("Güncelleme hatası:", err);
     }
   };
-  
 
   return (
     <div className="p-6">
@@ -157,14 +156,20 @@ const ApplicationListPage = () => {
                   >
                     Detay
                   </button>
-                  {app.status === "approved" && (
-                    <button
-                      onClick={() => handleOpenLawsuitModal(app)}
-                      className="bg-green-500 text-white px-4 py-2 rounded"
-                    >
-                         Dava Oluştur
-                    </button>
-                  )}
+                  {app.status === "approved" ? (
+                    app.lawsuitCreated ? (
+                      <span className="text-gray-500 italic">
+                        Davası Oluşturulmuştur
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleOpenLawsuitModal(app)}
+                        className="bg-green-500 text-white px-4 py-2 rounded"
+                      >
+                        Dava Oluştur
+                      </button>
+                    )
+                  ) : null}
                 </td>
               </tr>
             ))

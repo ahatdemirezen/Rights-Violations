@@ -72,6 +72,13 @@ export const createLawsuitWithFilesService = async (
 
     const savedLawsuit = await newLawsuit.save({ session });
 
+    // 4. Application'daki lawsuitCreated alanını güncelle
+    await ApplicationModel.findByIdAndUpdate(
+      applicationId,
+      { lawsuitCreated: true }, // `lawsuitCreated` alanını `true` yap
+      { session, new: true } // Transaction ile güvenli güncelleme
+    );
+
     // Transaction'ı tamamla
     await session.commitTransaction();
     session.endSession();

@@ -61,36 +61,49 @@ const ApplicationDetails = () => {
               <strong className="text-[#2C4E4A]">Yakınma Nedeni:</strong>{" "}
               {applicationDetails.complaintReason}
             </p>
-            <p className="text-gray-900 text-lg">
-              <strong className="text-[#2C4E4A]">Dosya:</strong>{" "}
-              {applicationDetails.file ? (
-                <a
-                  href={applicationDetails.file}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  Dosyayı Görüntüle
-                </a>
+
+            {/* Dosya ve Link Listesi */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-[#2C4E4A]">Dökümanlar:</h2>
+              {applicationDetails.populatedDocuments.length > 0 ? (
+                applicationDetails.populatedDocuments.map((doc, index) => (
+                  <div key={index} className="p-4 border border-gray-300 rounded-lg">
+                    <p className="text-gray-900">
+                      <strong className="text-[#2C4E4A]">Açıklama:</strong>{" "}
+                      {doc.documentDescription || "Açıklama Yok"}
+                    </p>
+                    {doc.documentSource && (
+                      <p className="text-gray-900">
+                        <strong className="text-[#2C4E4A]">Link:</strong>{" "}
+                        <a
+                          href={doc.documentSource}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Linke Git
+                        </a>
+                      </p>
+                    )}
+                    {doc.documentUrl && (
+                      <p className="text-gray-900">
+                        <strong className="text-[#2C4E4A]">Dosya:</strong>{" "}
+                        <a
+                          href={doc.documentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Dosyayı Görüntüle
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                ))
               ) : (
-                "Dosya mevcut değil."
+                <p className="text-gray-500">Hiçbir döküman mevcut değil.</p>
               )}
-            </p>
-            <p className="text-gray-900 text-lg">
-              <strong className="text-[#2C4E4A]">Link:</strong>{" "}
-              {applicationDetails.link ? (
-                <a
-                  href={applicationDetails.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  Linke Git
-                </a>
-              ) : (
-                "Link mevcut değil."
-              )}
-            </p>
+            </div>
           </div>
         ) : (
           <p className="text-center text-gray-500">Başvuru bulunamadı.</p>

@@ -178,3 +178,41 @@ export const getLawsuitById = async (
     next(error);
   }
 };
+
+export const getLawsuitsForCalendar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = (req as any).user?.userId; // Middleware'den gelen userId alınır
+
+    if (!userId) {
+       res.status(400).json({ message: "User ID not found in request" });
+    }
+
+    // Avukata ait davaları getir
+    const lawsuits = await getLawsuitsByLawyerService(userId);
+
+    // Takvim için gerekli bilgileri hazırlayın
+    const calendarEvents = lawsuits.map((lawsuit) => ({
+      id: lawsuit._id,
+      title: lawsuit.caseSubject || "Dava Konusu Yok",
+      start: lawsuit.lawsuitDate ? lawsuit.lawsuitDate.toISOString() : new Date(),
+      end: lawsuit.lawsuitDate ? lawsuit.lawsuitDate.toISOString() : new Date(),
+      applicantName: (lawsuit.applicationId as IApplication)?.applicantName || "Başvuran Adı Yok",
+      applicationNumber: (lawsuit.applicationId as IApplication)?.applicationNumber || "Başvuru No Yok",
+    }));
+    console.log("Takvim Verileri:", calendarEvents);
+
+    
+
+    res.status(200).json({
+      message: "Takvim verileri başarıyla alındı.",
+      events: calendarEvents,
+    });
+  } catch (error) {
+    console.error("Takvim verileri alınırken hata oluştu:", error);
+    next(error);
+  }
+};

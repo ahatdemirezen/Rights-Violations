@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useLawsuitListPageStore from "../../stores/LawsuitListForLawyerStore";
+import { FaFolder, FaFileAlt } from "react-icons/fa"; // Simge için ikonlar
 
 const LawsuitDetails = () => {
   const { lawsuitId } = useParams(); // URL'den davanın ID'sini al
@@ -112,8 +113,8 @@ const LawsuitDetails = () => {
   if (error) return <p>Hata: {error}</p>;
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+    <div className="max-w-4xl mx-auto p-6 bg-[#E8EAE6] text-black shadow-lg rounded-lg">
+<h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         Dava Detayları
       </h1>
       {selectedLawsuit ? (
@@ -121,7 +122,7 @@ const LawsuitDetails = () => {
           <div className="flex justify-end mb-4">
             <button
               onClick={() => setIsEditing((prev) => !prev)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+              className="bg-[#2C4E4A] text-white px-4 py-2 rounded-md hover:bg-[#5C8374] transition"
             >
               {isEditing ? "Düzenlemeyi İptal Et" : "Düzenle"}
             </button>
@@ -137,7 +138,7 @@ const LawsuitDetails = () => {
                   name="applicationNumber"
                   value={formData.applicationNumber || ""}
                   disabled={true} // Güncellenemez
-                  className="w-full border border-gray-300 rounded p-2 mt-1 bg-gray-200"
+                  className="w-full border border-gray-700 rounded p-2 mt-1 bg-gray-300"
                 />
               </div>
               <div>
@@ -149,7 +150,7 @@ const LawsuitDetails = () => {
                   name="applicantName"
                   value={formData.applicantName || ""}
                   disabled={true} // Güncellenemez
-                  className="w-full border border-gray-300 rounded p-2 mt-1 bg-gray-200"
+                  className="w-full border border-gray-700 rounded p-2 mt-1 bg-gray-300"
                 />
               </div>
               
@@ -163,7 +164,7 @@ const LawsuitDetails = () => {
                   value={formData.courtFileNo || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
@@ -176,21 +177,21 @@ const LawsuitDetails = () => {
                   value={formData.caseSubject || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
-  <label className="block text-sm font-medium text-gray-600">
-    Avukat
-  </label>
-  <input
-    type="text"
-    name="lawyer"
-    value={formData.lawyer || "Bilinmiyor"} // Avukat ismi veya "Bilinmiyor"
-    disabled={true} // Güncellenemez
-    className="w-full border border-gray-300 rounded p-2 mt-1 bg-gray-200"
-  />
-</div>
+                 <label className="block text-sm font-medium text-gray-600">
+                      Avukat
+                 </label>
+                 <input
+                  type="text"
+                  name="lawyer"
+                  value={formData.lawyer || "Bilinmiyor"} // Avukat ismi veya "Bilinmiyor"
+                  disabled={true} // Güncellenemez
+                  className="w-full border border-gray-700 rounded p-2 mt-1 bg-gray-300"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-600">
@@ -202,7 +203,7 @@ const LawsuitDetails = () => {
                   value={formData.fileNumber || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
@@ -215,7 +216,7 @@ const LawsuitDetails = () => {
                   value={formData.court || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
@@ -228,7 +229,7 @@ const LawsuitDetails = () => {
                   value={formData.caseNumber || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
@@ -247,7 +248,7 @@ const LawsuitDetails = () => {
                   }
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
@@ -260,7 +261,7 @@ const LawsuitDetails = () => {
                   value={formData.resultDescription || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
               <div>
@@ -273,7 +274,7 @@ const LawsuitDetails = () => {
                   value={formData.resultStage || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded p-2 mt-1"
+                  className="w-full border border-gray-700 rounded p-2 mt-1"
                 />
               </div>
             </div>
@@ -286,7 +287,7 @@ const LawsuitDetails = () => {
             <select
               value={selectedFileType}
               onChange={(e) => setSelectedFileType(e.target.value)}
-              className="w-full border border-gray-300 rounded p-2 mt-1"
+              className="w-full border border-gray-700 rounded p-2 mt-1"
             >
               <option value="">Tümü</option>
               <option value="Hearing Report">Duruşma İzleme Raporu</option>
@@ -295,100 +296,115 @@ const LawsuitDetails = () => {
               <option value="Indictment">İddianame</option>
             </select>
           </div>
-       {/* Dosyalar */}
-       <div className="mt-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">
-              Dosyalar
-            </h2>
-            {filteredFiles && filteredFiles.length > 0 ? (
-              <ul className="list-disc ml-5">
-                {filteredFiles.map((file, index) => (
-                  <li
-                    key={file._id || index}
-                    className="flex flex-col mb-4 border-b border-gray-200 pb-2"
-                  >
-                    <span className="text-sm text-gray-800">
-                      <strong>Açıklama:</strong> {file.description || "Açıklama Yok"}
-                    </span>
-                    <span className="text-sm text-gray-800">
-                      <strong>Dosya Tipi:</strong> {file.fileType || "Bilinmiyor"}
-                    </span>
-                    <a
-                      href={file.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-500 hover:underline mt-1"
-                    >
-                      Dosyayı Görüntüle
-                    </a>
-                  </li>
-                ))}
-              </ul>
+{/* Dosyalar */}
+<div className="mt-6">
+  <h2 className="text-lg font-semibold text-gray-700 mb-4">
+    Dosyalar
+  </h2>
+  {filteredFiles && filteredFiles.length > 0 ? (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {filteredFiles.map((file, index) => (
+        <div
+          key={file._id || index}
+          className="relative flex flex-col items-center bg-[#F3F4ED] p-4 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105 border border-[#6D8B74]"
+          >
+          {/* Dosya İkonu */}
+          <div className="text-[#6D8B74] text-6xl mb-2">
+            {file.fileType === "Folder" ? (
+              <FaFolder />
             ) : (
-              <p className="text-sm text-gray-600">Yüklü dosya bulunamadı.</p>
+              <FaFileAlt />
             )}
           </div>
+          {/* Dosya Bilgileri */}
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-800">
+              {file.description || "Açıklama Yok"}
+            </p>
+            <p className="text-xs text-gray-600">
+              {file.fileType || "Bilinmiyor"}
+            </p>
+          </div>
+          {/* Hover Efekti */}
+          <a
+            href={file.fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 text-white font-medium text-sm rounded-lg transition-opacity"
+          >
+            Görmek İçin Tıklayın
+          </a>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-sm text-gray-600">Yüklü dosya bulunamadı.</p>
+  )}
+</div>
+
+
 
           {/* Yeni Dosya Yükleme */}
           {isEditing && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold text-gray-700 mb-2">
-                Yeni Dosya Ekle
-              </h2>
+          <div className="mt-6">
+          <h2 className="text-lg font-semibold text-[#2C4E4A] mb-4">
+            Yeni Dosya Ekle
+          </h2>
+          <input
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            className="w-full border border-[#6D8B74] rounded p-2 mt-1 bg-[#F3F4ED]"
+          />
+          {newFiles.map((file, index) => (
+            <div key={file.name || index} className="mt-2">
+              <label className="block text-sm font-medium text-[#2C4E4A]">
+                Açıklama ({file.name})
+              </label>
               <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="w-full border border-gray-300 rounded p-2 mt-1"
+                type="text"
+                value={newDescriptions[index] || ""}
+                onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                className="w-full border border-[#6D8B74] rounded p-2 mt-1 bg-[#F3F4ED]"
               />
-               {newFiles.map((file, index) => (
-                <div key={file.name || index} className="mt-2">
-                  <label className="block text-sm font-medium text-gray-600">
-                    Açıklama ({file.name})
-                  </label>
-                  <input
-                    type="text"
-                    value={newDescriptions[index] || ""}
-                    onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                    className="w-full border border-gray-300 rounded p-2 mt-1"
-                  />
-                  <label className="block text-sm font-medium text-gray-600 mt-2">
-                    Dosya Tipi
-                  </label>
-                  <select
-                    value={newFileTypes[index] || ""}
-                    onChange={(e) => handleFileTypeChange(index, e.target.value)}
-                    className="w-full border border-gray-300 rounded p-2 mt-1"
-                  >
-                    <option value="">Seçiniz</option>
-                    <option value="Hearing Report">Duruşma İzleme Raporu</option>
-                    <option value="Petition">Dilekçeler</option>
-                    <option value="Hearing Minutes">Duruşma Tutanakları</option>
-                    <option value="Indictment">İddianame</option>
-                  </select>
-                </div>
-              ))}
-
-
-
+              <label className="block text-sm font-medium text-[#2C4E4A] mt-2">
+                Dosya Tipi
+              </label>
+              <select
+                value={newFileTypes[index] || ""}
+                onChange={(e) => handleFileTypeChange(index, e.target.value)}
+                className="w-full border border-[#6D8B74] rounded p-2 mt-1 bg-[#F3F4ED]"
+              >
+                <option value="">Seçiniz</option>
+                <option value="Hearing Report">Duruşma İzleme Raporu</option>
+                <option value="Petition">Dilekçeler</option>
+                <option value="Hearing Minutes">Duruşma Tutanakları</option>
+                <option value="Indictment">İddianame</option>
+              </select>
             </div>
+          ))}
+        </div>
+        
           )}
 
           {isEditing && (
             <div className="mt-4 flex justify-end">
               <button
                 onClick={handleSave}
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
-              >
+                className="bg-[#6D8B74] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#4A766E] transition"
+                >
                 Kaydet
               </button>
+              
             </div>
+            
           )}
         </div>
       ) : (
         <p>Dava bilgisi bulunamadı.</p>
       )}
     </div>
+    
   );
 };
 

@@ -45,6 +45,7 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
       nationalID,
       applicationType,
       applicationDate,
+      organizationName,
       address,
       phoneNumber,
       complaintReason,
@@ -55,7 +56,7 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
     } = req.body;
 
     // Zorunlu Alan Kontrolü
-    if (!applicantName || !nationalID || !applicationType || !applicationDate || !eventCategories) {
+    if ( !nationalID || !applicationType || !applicationDate || !eventCategories) {
       res.status(400).json({ error: "Zorunlu alanlar eksik!" });
       return; // Fonksiyondan çık
     }
@@ -131,6 +132,7 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
     const newApplication = new ApplicationModel({
       applicationNumber,
       applicantName,
+      organizationName,
       receivedBy, // Başvuruyu alan kişi ekleniyor
       nationalID,
       applicationType,

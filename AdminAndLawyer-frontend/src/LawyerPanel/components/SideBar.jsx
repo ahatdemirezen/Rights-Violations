@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaGavel, FaUserTie, FaChevronLeft, FaChevronRight } from "react-icons/fa"; // Yeni ikonlar
+import { FaGavel, FaUserTie, FaChevronLeft, FaChevronRight,FaCalendarAlt } from "react-icons/fa"; // Yeni ikonlar
+import BaroLogo from "../../assets/sanliurfa-barosu.png";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -26,7 +27,15 @@ const Sidebar = () => {
       {/* Kullanıcı Bilgisi */}
       {isOpen && (
         <div className="flex items-center flex-col p-4 border-b border-[#4A766E]">
-          <h4 className="mt-2 font-semibold text-lg">Avukat Adı</h4>
+           <div className="w-20 h-20 rounded-full bg-white overflow-hidden shadow-md">
+            {/* Sanlıurfa Barosu Logosu */}
+            <img
+              src={BaroLogo}
+              alt="Sanlıurfa Barosu"
+              className="object-cover w-full h-full"
+            />
+          </div>
+          <h4 className="mt-2 font-semibold text-lg">Avukat Adı </h4>
           <p className="text-sm text-[#D0C9C0]">Hukuk Uzmanı</p>
         </div>
       )}
@@ -48,6 +57,14 @@ const Sidebar = () => {
               {isOpen ? "Davalar" : "D"}
             </Link>
           </li>
+
+          <li className="px-4 py-2 hover:bg-[#4A766E] rounded flex items-center">
+            <FaCalendarAlt className="text-lg mr-3" />
+            <Link to="/lawyer/calendar" className="block">
+              {isOpen ? "Takvim" : "T"}
+            </Link>
+          </li>
+
         </ul>
       </nav>
 

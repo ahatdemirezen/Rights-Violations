@@ -138,7 +138,7 @@ const ApplicationListPage = () => {
             filteredApplications.map((app) => (
               <tr key={app._id} className="hover:bg-gray-100">
                 <td className="border border-gray-300 px-4 py-2">
-                  {app.applicantName}
+                  {app.applicantName || app.organizationName}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
                   {app.applicationType}

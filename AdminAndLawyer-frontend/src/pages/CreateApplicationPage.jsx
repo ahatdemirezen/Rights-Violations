@@ -7,6 +7,7 @@
     // Form verilerini tutan state
     const [formData, setFormData] = useState({
         applicantName: "",
+        organizationName:"",
         receivedBy: "", // Başvuruyu alan kişi
         nationalID: "",
         applicationType: "individual",
@@ -86,17 +87,7 @@
         <h1 className="text-2xl font-bold mb-4">Yeni Başvuru</h1>
         <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
-            <div>
-                <label className="block text-gray-700">Başvuru Sahibi:</label>
-                <input
-                type="text"
-                name="applicantName"
-                value={formData.applicantName}
-                onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-                />
-            </div>
+            
             <div>
                 <label>Başvuruyu Alan Kişi:</label>
                 <input
@@ -104,6 +95,7 @@
                 name="receivedBy"
                 value={formData.receivedBy}
                 onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
                 required
                 />
             </div>
@@ -130,6 +122,32 @@
                 <option value="organization">Kurumsal</option>
                 </select>
             </div>
+             {/* Başvuru Sahibi veya Kurum Adı */}
+          {formData.applicationType === "individual" ? (
+            <div>
+              <label className="block text-gray-700">Başvuru Sahibi:</label>
+              <input
+                type="text"
+                name="applicantName"
+                value={formData.applicantName}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="block text-gray-700">Kurum Adı:</label>
+              <input
+                type="text"
+                name="organizationName"
+                value={formData.organizationName}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              />
+            </div>
+          )}
             <div>
                 <label className="block text-gray-700">Başvuru Tarihi:</label>
                 <input

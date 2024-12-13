@@ -20,8 +20,13 @@ export const getLawsuitsByLawyerService = async (userId: string) => {
 
   const lawsuits = await LawsuitTrackingModel.find({
     applicationId: { $in: applicationIds },
-  }).exec();
-
+  })
+    .populate({
+      path: "applicationId", // Başvuru bilgilerini doldur
+      select: "applicantName applicationNumber", // Sadece gerekli alanları getir
+    })
+    .exec();
+  
   if (!lawsuits || lawsuits.length === 0) {
     throw createHttpError(404, "No lawsuits found for the given lawyer's applications");
   }

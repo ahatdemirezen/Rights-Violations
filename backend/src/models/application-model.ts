@@ -23,8 +23,12 @@ const ApplicationSchema = new Schema<IApplication>(
   {
     applicationNumber: { type: Number, required: true, unique: true },
     receivedBy: { type: String, default: null },
-    applicantName: { type: String, required: true },
-    nationalID: { type: String, required: true, unique: true, minlength: 11, maxlength: 11 },
+    applicantName: {
+      type: String,
+      required: function (this: IApplication) {
+        return this.applicationType === "individual"; // Kurum adı sadece "organization" türünde zorunlu
+      },
+    },    nationalID: { type: String, required: true, unique: true, minlength: 11, maxlength: 11 },
     applicationType: { type: String, enum: ["organization", "individual"], required: true },
     organizationName: {
       type: String,

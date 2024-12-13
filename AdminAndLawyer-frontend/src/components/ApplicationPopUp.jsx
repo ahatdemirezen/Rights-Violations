@@ -17,6 +17,8 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
     documentDescription: "", // Açıklama alan
     lawyer: application.lawyer || "", // Avukat alanı (ID)
     eventCategories: application.eventCategories || "", // Event kategorisi (string)
+    organizationName: application.organizationName || "", // Kurum adı
+
   });
 
   const eventCategoriesOptions = [
@@ -190,28 +192,34 @@ useEffect(() => {
           </div>
            {/* Başvuru Türüne Göre Alan */}
            {formData.applicationType === "individual" ? (
-            <div>
-              <label className="block text-gray-700">Başvuru Sahibi (İsim Soyisim):</label>
-              <input
-                type="text"
-                name="applicantName"
-                value={formData.applicantName}
-                onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-            </div>
-          ) : (
-            <div>
-              <label className="block text-gray-700">Kurum Adı:</label>
-              <input
-                type="text"
-                name="organizationName"
-                value={formData.applicantName || ""}
-                onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-            </div>
-          )}
+  <div>
+    <label className="block text-gray-700">Başvuru Sahibi (İsim Soyisim):</label>
+    <input
+      type="text"
+      name="applicantName"
+      value={formData.applicantName || ""}
+      onChange={handleInputChange}
+      className="w-full p-2 border border-gray-300 rounded"
+    />
+  </div>
+) : (
+  <div>
+    <label className="block text-gray-700">Kurum Adı:</label>
+    <input
+      type="text"
+      name="organizationName"
+      value={formData.organizationName || ""}
+      onChange={(e) =>
+        setFormData((prev) => ({
+          ...prev,
+          organizationName: e.target.value,
+        }))
+      }
+      className="w-full p-2 border border-gray-300 rounded"
+    />
+  </div>
+)}
+
           <div>
             <label className="block text-gray-700">Başvuru Durumu:</label>
             <select

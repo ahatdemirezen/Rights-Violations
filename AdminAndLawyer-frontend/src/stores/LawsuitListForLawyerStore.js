@@ -9,7 +9,9 @@ const useLawsuitListForLawyerStore = create((set) => ({
   selectedLawsuit: null, // Tek bir dava bilgisi
   loading: false, // Yüklenme durumu
   error: null, // Hata mesajı
-
+  calendarEvents: [], // Takvim etkinlikleri
+  loading: false,
+  error: null,
   // Davaları getirme fonksiyonu
   fetchLawsuits: async () => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
@@ -68,6 +70,32 @@ const useLawsuitListForLawyerStore = create((set) => ({
       });
     }
   },
+  // Takvim etkinliklerini getir
+  fetchCalendarEvents: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axiosInstance.get(`${apiUrl}/lawyer-lawsuits/calendar`);
+      console.log("API'den gelen veriler:", response.data.events); // Gelen verileri kontrol edin
+  
+      // `formattedEvents` değişkenini tanımlayın
+      const formattedEvents = response.data.events.map((event) => ({
+        ...event,
+      
+        start: new Date(event.start), // Tarihi doğru formata çevir
+        end: new Date(event.end), // Tarihi doğru formata çevir
+      }));
+  
+      console.log("Formatlanmış eventler:", formattedEvents); // Formatlanmış verileri kontrol edin
+  
+      set({ calendarEvents: formattedEvents, loading: false });
+    } catch (err) {
+      set({
+        error: err.response?.data?.message || "Takvim verileri alınırken bir hata oluştu.",
+        loading: false,
+      });
+    }
+  },
+  
 }));
 
 export default useLawsuitListForLawyerStore;

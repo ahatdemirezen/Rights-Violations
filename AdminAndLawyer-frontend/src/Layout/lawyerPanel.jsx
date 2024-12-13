@@ -6,6 +6,7 @@ import ApplicationDetails from "../LawyerPanel/pages/ApplicationDetailForLawyer"
 import LawsuitList from "../LawyerPanel/pages/LawsuitListPage"; 
 import LawsuitDetails from "../LawyerPanel/pages/LawsuitDetailsForLawyer";
 import Header from "../LawyerPanel/components/Header";
+import CalendarPage from "../LawyerPanel/pages/CalendarPage";
 
 const LawyerPanel = () => {
   return (
@@ -19,6 +20,7 @@ const LawyerPanel = () => {
             <Route path="/applications/:applicationId" element={<ApplicationDetails />} />
             <Route path="/lawsuits" element={<LawsuitList />} />
             <Route path="/lawsuitdetail/:lawsuitId" element={<LawsuitDetails />} />
+            <Route path="/calendar" element={<CalendarPage />} />
 
             {/* Diğer lawyer sayfaları */}
           </Routes>

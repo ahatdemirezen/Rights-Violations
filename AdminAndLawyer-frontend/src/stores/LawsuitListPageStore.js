@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import axiosInstance from "./axiosInstance";
 
 const apiUrl = import.meta.env.VITE_BE_URL; // API URL'sini .env dosyasından alın
 
@@ -13,7 +13,7 @@ const useLawsuitListPageStore = create((set) => ({
   fetchLawsuits: async () => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
     try {
-      const response = await axios.get(`${apiUrl}/lawsuittracking`); // GET isteği
+      const response = await axiosInstance.get(`${apiUrl}/lawsuittracking`); // GET isteği
       const lawsuits = response.data.lawsuits; // API'den dönen davalar
       set({ lawsuits, loading: false }); // Davaları state'e kaydet ve yüklenme durumunu kapat
     } catch (error) {
@@ -28,7 +28,7 @@ const useLawsuitListPageStore = create((set) => ({
   fetchLawsuitById: async (lawsuitId) => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
     try {
-      const response = await axios.get(`${apiUrl}/lawsuittracking/${lawsuitId}`); // GET isteği
+      const response = await axiosInstance.get(`${apiUrl}/lawsuittracking/${lawsuitId}`); // GET isteği
       console.log("API'den dönen yanıt:", response.data); // Burada lawyer'ın `name` bilgisi var mı?
 
       const lawsuit = response.data.lawsuit; // API'den dönen dava bilgisi
@@ -45,7 +45,7 @@ const useLawsuitListPageStore = create((set) => ({
   updateLawsuit: async (lawsuitId, formData) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.put(`${apiUrl}/lawsuittracking/${lawsuitId}`, formData, {
+      const response = await axiosInstance.put(`${apiUrl}/lawsuittracking/${lawsuitId}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -69,7 +69,7 @@ const useLawsuitListPageStore = create((set) => ({
   createLawsuit: async (applicationId, formData) => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${apiUrl}/lawsuittracking/${applicationId}`,
         formData,
         {
@@ -97,7 +97,7 @@ const useLawsuitListPageStore = create((set) => ({
   updateLawsuitArchiveStatus: async (lawsuitId, archiveStatus) => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${apiUrl}/lawsuittracking/${lawsuitId}/archive`,
         { archive: archiveStatus }, // Gönderilecek body
         { withCredentials: true } // Kimlik doğrulama bilgilerini ekle

@@ -8,13 +8,16 @@ const jwtSecret = process.env.JWT_SECRET;
 
 // Request tipini genişletiyoruz
 interface CustomRequest extends Request {
-  user?: string | JwtPayload;
+  user?: { roles: string[] }; // JWT payload için kullanıcı bilgileri
 }
 
-export const authenticateToken = (req: CustomRequest, res: Response, next: NextFunction) => {
+export const authenticateAdmin = (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
   // Eğer Authorization başlığı yoksa cookie'den token'ı al
   const cookieToken = req.cookies.token;
-  console.log("Cookie Token:", cookieToken); // Çerezdeki token'ı loglayın
 
   // Token yoksa hata döndür
   if (!cookieToken) {
@@ -26,12 +29,20 @@ export const authenticateToken = (req: CustomRequest, res: Response, next: NextF
     // Token doğrulama
     const verifiedToken = jwt.verify(cookieToken, jwtSecret || "") as JwtPayload;
 
-    // Token içerisindeki role kontrolü
-    if (verifiedToken.role === "admin") {
-      next(); // Eğer role "admin" ise devam et
-    } else {
-      res.status(403).json({ message: "Forbidden: You do not have admin access" }); // Role admin değilse hata döndür
+    console.log("Verified Token Content:", verifiedToken);
+
+    // Token içerisinden roles bilgilerini al ve req.user'a ekle
+    req.user = {
+      roles: verifiedToken.roles as string[], // Roles array olarak ekleniyor
+    };
+
+    // Roles içerisinde "admin" rolü olup olmadığını kontrol et
+    if (!req.user.roles.some((role) => role.toLowerCase() === "admin")) {
+      res.status(403).json({ message: "Forbidden: You do not have admin access" });
+      return;
     }
+
+    next(); // Her şey doğruysa bir sonraki middleware'e geç
   } catch (error) {
     res.status(401).json({ message: "Unauthorized request" });
     return;

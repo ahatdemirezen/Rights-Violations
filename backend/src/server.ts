@@ -11,6 +11,7 @@ import applicationForLawyerRoutes from "./routes/applicationForLawyer-route"
 import lawsuitTrackingLawyerRoutes from "./routes/lawsuit-trackingForLawyer-route"
 import documentRoutes from "./routes/document-route"
 import citizenApplicationRoute from "./routes/citizen-route";
+import { authenticateAdmin } from "./middleware/admin-auth";
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:5173"],
+    origin: [process.env.FRONTEND_URL || "http://localhost:5173" , process.env.WEB_URL || "http://localhost:5174"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Credentials ile ilgili isteklere izin ver
@@ -37,14 +38,13 @@ app.get("/", (req: Request, res: Response) => {
 
 // API rotaları
 app.use("/api/login", loginRoute);
-app.use("/api/lawyer", lawyerRoute);
-app.use("/api/lawsuittracking" , lawsuitTrackingRoutes)
-app.use('/api/applications', applicationRoutes);
+app.use("/api/lawyer",  lawyerRoute);
+app.use("/api/lawsuittracking" , authenticateAdmin , lawsuitTrackingRoutes)
+app.use('/api/applications', authenticateAdmin , applicationRoutes);
 app.use('/api/lawyerapplication', applicationForLawyerRoutes )
 app.use("/api/citizen/create", citizenApplicationRoute);
-
 app.use('/api/lawyer-lawsuits' , lawsuitTrackingLawyerRoutes)
-app.use('/api/documents' , documentRoutes )
+app.use('/api/documents' , authenticateAdmin , documentRoutes )
 
 // Hataları yakalayan middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

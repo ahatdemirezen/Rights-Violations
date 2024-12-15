@@ -11,6 +11,7 @@ const LawsuitList = () => {
     loading,
     error,
   } = useLawsuitListPageStore();
+
   const [searchTerm, setSearchTerm] = useState(""); // Arama terimi durumu
   const [filteredLawsuits, setFilteredLawsuits] = useState([]); // Filtrelenmiş davalar
 
@@ -19,7 +20,7 @@ const LawsuitList = () => {
   }, [fetchLawsuits]);
 
   useEffect(() => {
-    // Archive değeri false olan davaları filtrele
+    // Archive değeri true olan davaları filtrele
     const activeLawsuits = lawsuits.filter((lawsuit) => lawsuit.archive === true);
 
     // Davaları arama terimine göre filtrele
@@ -39,82 +40,86 @@ const LawsuitList = () => {
     setFilteredLawsuits(filtered);
   }, [searchTerm, lawsuits]);
 
-  const handleArchive = async (lawsuitId) => {
-    try {
-      await updateLawsuitArchiveStatus(lawsuitId, true); // Archive değerini true yap
-      alert("Dava başarıyla arşive taşındı.");
-    } catch (error) {
-      alert("Dava arşive taşınırken bir hata oluştu.");
-      console.error(error);
-    }
-  };
-
-  if (loading) return <p>Yükleniyor...</p>;
-  if (error) return <p>Hata: {error}</p>;
+  if (loading) return <p className="text-center text-[#123D3D]">Yükleniyor...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 p-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Arşivlenmiş Davalar
-      </h1>
+    <div className="flex justify-center bg-[#F0F0F0] min-h-screen py-10">
+      <div className="max-w-screen-lg w-full p-6 bg-[#fdf8f0] rounded-lg shadow-lg">
+        {/* Sayfa Başlığı ve Arama Alanı */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-[#123D3D]">Arşivlenmiş Davalar</h1>
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Av, Mahkeme vs. Ara..."
+            className="w-1/3"
+          />
+        </div>
 
-      {/* SearchBar Bileşeni */}
-      <div className="mb-4">
-        <SearchBar
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Av, Mahkeme vs. Ara..."
-        />
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 bg-white shadow rounded">
-          {/* Tablo Başlığı */}
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="text-left px-4 py-2 border-b">Başvuran Adı</th>
-              <th className="text-left px-4 py-2 border-b">Avukat</th>
-              <th className="text-left px-4 py-2 border-b">Mahkeme</th>
-              <th className="text-left px-4 py-2 border-b">Esas No</th>
-              <th className="text-left px-4 py-2 border-b">Dava Oluşturma Tarihi</th>
-              <th className="text-left px-4 py-2 border-b">İşlemler</th>
-            </tr>
-          </thead>
-          {/* Tablo Gövdesi */}
-          <tbody>
-            {filteredLawsuits.map((lawsuit) => (
-              <tr key={lawsuit._id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b text-sm text-gray-600">
-                  {lawsuit.applicantName || "Başvuran Belirtilmemiş"}
-                </td>
-                <td className="px-4 py-2 border-b text-sm text-gray-600">
-                  {lawsuit.lawyer || "Avukat Belirtilmemiş"}
-                </td>
-                <td className="px-4 py-2 border-b text-sm text-gray-600">
-                  {lawsuit.court || "Mahkeme Belirtilmemiş"}
-                </td>
-                <td className="px-4 py-2 border-b text-sm text-gray-600">
-                  {lawsuit.caseNumber || "Esas No Belirtilmemiş"}
-                </td>
-                <td className="px-4 py-2 border-b text-sm text-gray-600">
-                  {lawsuit.lawsuitDate
-                    ? new Date(lawsuit.lawsuitDate).toLocaleDateString()
-                    : "Dava Tarihi Belirtilmemiş"}
-                </td>
-                <td className="px-4 py-2 border-b text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      to={`/admin/lawsuit/${lawsuit._id}`}
-                      className="text-blue-500 hover:underline"
-                    >
-                      Detaylı Görüntüle
-                    </Link>
-                  </div>
-                </td>
+        {/* Dava Tablosu */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-[#D5C4A1] bg-[#f8f1e8] rounded-lg shadow-md">
+            {/* Tablo Başlığı */}
+            <thead>
+              <tr className="bg-[#123D3D] text-[#F8F1E8]">
+                <th className="px-4 py-3 border-b">Başvuran Adı</th>
+                <th className="px-4 py-3 border-b">Avukat</th>
+                <th className="px-4 py-3 border-b">Başvuru No</th>
+                <th className="px-4 py-3 border-b">Mahkeme</th>
+                <th className="px-4 py-3 border-b">Esas No</th>
+                <th className="px-4 py-3 border-b">Dava Tarihi</th>
+                <th className="px-4 py-3 border-b">İşlemler</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            {/* Tablo Gövdesi */}
+            <tbody>
+              {filteredLawsuits.map((lawsuit) => (
+                <tr
+                  key={lawsuit._id}
+                  className="hover:bg-[#D5C4A1] text-[#123D3D] transition"
+                >
+                  <td className="px-4 py-3 border-b">
+                    {lawsuit.applicantName || "Başvuran Belirtilmemiş"}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    {lawsuit.lawyer || "Avukat Belirtilmemiş"}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    {lawsuit.applicationNumber || "Başvuru No Yok"}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    {lawsuit.court || "Mahkeme Belirtilmemiş"}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    {lawsuit.caseNumber || "Esas No Belirtilmemiş"}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    {lawsuit.lawsuitDate
+                      ? new Date(lawsuit.lawsuitDate).toLocaleDateString()
+                      : "Dava Tarihi Belirtilmemiş"}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    <div className="flex space-x-2">
+                      <Link
+                        to={`/admin/lawsuit/${lawsuit._id}`}
+                        className="bg-[#123D3D] text-[#F8F1E8] px-3 py-1 rounded shadow hover:bg-[#D4AF37] hover:text-[#123D3D] transition"
+                      >
+                        Detaylı Görüntüle
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Alt Bilgi */}
+        {filteredLawsuits.length === 0 && (
+          <p className="text-center text-[#123D3D] mt-4">Arşivlenmiş dava bulunamadı.</p>
+        )}
       </div>
     </div>
   );

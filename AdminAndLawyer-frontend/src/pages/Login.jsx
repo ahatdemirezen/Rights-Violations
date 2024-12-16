@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useAuthStore } from "../stores/LoginStore";
 import { useNavigate } from "react-router-dom";
-import BackgroundVideo from "../assets/video.mp4"; // Video dosyasını import edin
+import BackgroundVideo from "../assets/login.mp4"; // Video dosyasını import edin
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import Logo from "../assets/foto.jpeg"; // Logoyu import edin
 
 const Login = () => {
   const [name, setName] = useState('');
@@ -41,75 +44,85 @@ const Login = () => {
       <div className="bg-[#C0D9E5] bg-opacity-70 p-6 rounded-lg shadow-lg w-full max-w-[100%] h-full max-h-[100%]">
       </div>
 
-      <div className="absolute inset-4">
+      <div className="absolute inset-0">
         <video
-className="w-[100%] h-[100%] object-contain"    
-          src={BackgroundVideo}
+    className="w-full h-full object-cover"
+    src={BackgroundVideo}
           autoPlay
           muted
           loop
         ></video>
-        
+         {/* Sol Üst Köşe Logo */}
+         <img
+          src={Logo}
+          alt="Logo"
+          className="absolute top-1 left-4 w-40 h-40 object-cover rounded-full"
+          />
       </div>
 
-      {/* Login Formu */}
-      <div className="absolute inset-0 flex items-center justify-center z-10">
-        <div className="bg-black bg-opacity-60 p-6 rounded-lg shadow-lg w-[350px] md:w-[400px]">
-          <h2 className="text-xl font-semibold text-center text-gray-300 mb-4">
-            Hoşgeldiniz
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-sm text-gray-400 font-medium mb-2">
-                Name Surname
-              </label>
-              <input
-                className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 leading-tight focus:outline-none focus:border-gray-500"
-                type="text"
-                placeholder="Name Surname"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="mb-6 relative">
-              <label className="block text-sm text-gray-400 font-medium mb-2">
-                Password
-              </label>
-              <input
-                className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 leading-tight focus:outline-none focus:border-gray-500"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 px-3 py-2 text-gray-500 hover:text-gray-300 focus:outline-none"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Gizle" : "Göster"}
-              </button>
-              <div className="text-right mt-2">
-                <a
-                  href="#"
-                  className="text-xs text-gray-500 hover:text-gray-300"
-                >
-                  Şifremi Unuttum
-                </a>
-              </div>
-            </div>
-            <div className="flex items-center justify-center">
-              <button
-                className="bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full text-sm"
-                type="submit"
-              >
-                Giriş Yap
-              </button>
-            </div>
-            {error && <p className="text-red-500 text-xs mt-4">{error}</p>}
-          </form>
-        </div>
+      {/* Login Form */}
+<div className="absolute inset-0 flex items-center justify-center z-10">
+  <div className="bg-[#1B2B27]/60 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-[90%] md:w-[600px] lg:w-[700px]">
+    <h2 className="text-3xl font-bold text-center text-[#C3A47E] mb-8">
+      Hoşgeldiniz
+    </h2>
+    <form onSubmit={handleSubmit}>
+      <div className="mb-6">
+        <label className="block text-lg text-[#C3A47E] font-semibold mb-2">
+          Name Surname
+        </label>
+        <input
+          className="shadow-lg appearance-none border border-[#3E4A42] rounded-lg w-full py-3 px-4 bg-[#28332E]/70 text-[#E0E0E0] leading-tight focus:outline-none focus:border-[#C3A47E]"
+          type="text"
+          placeholder="Name Surname"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="new-password"
+
+        />
       </div>
+      <div className="mb-8 relative">
+        <label className="block text-lg text-[#C3A47E] font-semibold mb-2">
+          Şifre
+        </label>
+        <input
+          className="shadow-lg appearance-none border border-[#3E4A42] rounded-lg w-full py-3 px-4 bg-[#28332E]/70 text-[#E0E0E0] leading-tight focus:outline-none focus:border-[#C3A47E]"
+          type={showPassword ? "text" : "password"}
+          placeholder="Şifrenizi girin"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+        type="button"
+        className="mt-2 flex items-center gap-2 text-[#C3A47E] hover:text-[#E0E0E0] focus:outline-none"
+        onClick={() => setShowPassword(!showPassword)}
+      >
+        {showPassword ? (
+          <>
+            <FontAwesomeIcon icon={faEyeSlash} />
+            <span>Şifreyi Gizle</span>
+          </>
+        ) : (
+          <>
+            <FontAwesomeIcon icon={faEye} />
+            <span>Şifreyi Göster</span> 
+          </>
+        )}
+      </button>
+      </div>
+      <div className="flex items-center justify-center">
+        <button
+          className="bg-[#3E4A42] hover:bg-[#4A5A50] text-[#C3A47E] font-semibold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline w-full text-lg"
+          type="submit"
+        >
+          Devam Et →
+        </button>
+      </div>
+      {error && <p className="text-red-500 text-sm mt-6">{error}</p>}
+    </form>
+  </div>
+</div>
+
     </div>
   );
 };

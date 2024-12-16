@@ -50,7 +50,7 @@ const CitizenApplicationStore = () => {
         console.log(pair[0], pair[1]);
       }
   
-      await axios.post(`${apiUrl}/applications`, formData, {
+      await axios.post(`${apiUrl}/citizen/create`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   

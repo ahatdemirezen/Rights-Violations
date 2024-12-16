@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import useLawyerListPageStore from "../stores/LawyerListPageStore"; // Zustand store'u içe aktar
+import useLawyerListPageStore from "../stores/LawyerListPageStore";
 
 const LawyerForm = ({ isOpen, onClose }) => {
-  const { createLawyer, loading, error } = useLawyerListPageStore(); // Zustand'dan fonksiyonları al
+  const { createLawyer, loading, error } = useLawyerListPageStore();
   const [formData, setFormData] = useState({
     nationalID: "",
     name: "",
@@ -12,34 +12,34 @@ const LawyerForm = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createLawyer(formData); // Veriyi createLawyer fonksiyonuna gönder
-    onClose(); // Pop-up'ı kapat
-    setFormData({ nationalID: "", name: "", password: "", gender: "male" }); // Formu sıfırla
+    await createLawyer(formData);
+    onClose();
+    setFormData({ nationalID: "", name: "", password: "", gender: "male" });
   };
 
-  if (!isOpen) return null; // Pop-up kapalıysa hiçbir şey render edilmez
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+      <div className="bg-[#fffcf8] rounded-lg shadow-lg p-6 w-96 border border-[#f7f1eb]">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Kayıt Formu</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-[#123D3D]">Avukat Kayıt</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition"
+            className="text-[#123D3D] hover:text-[#D4AF37] transition text-2xl"
           >
-            &times; {/* Kapatma butonu */}
+            &times;
           </button>
         </div>
-
+        
         {/* Form */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* TC Kimlik No */}
-          <div className="mb-4">
+          <div>
             <label
               htmlFor="tc"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#123D3D]"
             >
               TC Kimlik No
             </label>
@@ -50,7 +50,7 @@ const LawyerForm = ({ isOpen, onClose }) => {
               onChange={(e) =>
                 setFormData({ ...formData, nationalID: e.target.value })
               }
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-[#D5C4A1] rounded-md bg-[#F8F1E8] text-[#123D3D] focus:ring-[#D4AF37] focus:border-[#D4AF37]"
               placeholder="TC Kimlik No"
               required
               maxLength="11"
@@ -59,10 +59,10 @@ const LawyerForm = ({ isOpen, onClose }) => {
           </div>
 
           {/* İsim */}
-          <div className="mb-4">
+          <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#123D3D]"
             >
               İsim
             </label>
@@ -73,17 +73,17 @@ const LawyerForm = ({ isOpen, onClose }) => {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-[#D5C4A1] rounded-md bg-[#F8F1E8] text-[#123D3D] focus:ring-[#D4AF37] focus:border-[#D4AF37]"
               placeholder="Ad ve Soyad"
               required
             />
           </div>
 
           {/* Şifre */}
-          <div className="mb-4">
+          <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#123D3D]"
             >
               Şifre
             </label>
@@ -94,18 +94,18 @@ const LawyerForm = ({ isOpen, onClose }) => {
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full p-2 border border-[#D5C4A1] rounded-md bg-[#F8F1E8] text-[#123D3D] focus:ring-[#D4AF37] focus:border-[#D4AF37]"
               placeholder="Şifre"
               required
             />
           </div>
 
           {/* Cinsiyet */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
+          <div>
+            <label className="block text-sm font-medium text-[#123D3D]">
               Cinsiyet
             </label>
-            <div className="mt-2 flex items-center space-x-4">
+            <div className="mt-2 flex items-center space-x-6">
               <label className="flex items-center">
                 <input
                   type="radio"
@@ -115,9 +115,9 @@ const LawyerForm = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, gender: e.target.value })
                   }
-                  className="form-radio text-blue-500"
+                  className="form-radio text-[#123D3D] focus:ring-[#D4AF37]"
                 />
-                <span className="ml-2 text-gray-700">Erkek</span>
+                <span className="ml-2 text-[#123D3D]">Erkek</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -128,9 +128,9 @@ const LawyerForm = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, gender: e.target.value })
                   }
-                  className="form-radio text-blue-500"
+                  className="form-radio text-[#123D3D] focus:ring-[#D4AF37]"
                 />
-                <span className="ml-2 text-gray-700">Kadın</span>
+                <span className="ml-2 text-[#123D3D]">Kadın</span>
               </label>
             </div>
           </div>
@@ -140,7 +140,7 @@ const LawyerForm = ({ isOpen, onClose }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+              className="w-full bg-[#123D3D] text-[#F8F1E8] py-2 px-4 rounded-md hover:bg-[#D4AF37] hover:text-[#123D3D] transition"
             >
               {loading ? "Kaydediliyor..." : "Kaydet"}
             </button>
@@ -148,7 +148,7 @@ const LawyerForm = ({ isOpen, onClose }) => {
         </form>
 
         {/* Hata Mesajı */}
-        {error && <p className="text-red-500 mt-4">{error}</p>}
+        {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ export const createApplicationService = async (applicationData: any, files: any)
     for (let i = 0; i < uploadedFiles.length; i++) {
       const file = uploadedFiles[i] as Express.Multer.File;
       const description = Array.isArray(descriptions) ? descriptions[i] : descriptions || `Document ${i + 1}`;
-      const type = Array.isArray(types) ? types[i] : "Other";
+      const type = Array.isArray(types) ? types[i] : types || "Other";
 
       try {
         const s3Response = await uploadToS3(file);
@@ -139,7 +139,8 @@ export const getAllApplicationsService = async (documentType?: string) => {
       // Başvuruyu veritabanından al ve belgeleri populate et
       const application = await ApplicationModel.findById(id).populate({
         path: "documents",
-        select: "documents.documentUrl documents.documentDescription documents.documentSource", // Alt belgeleri al
+        select:
+          "documents.documentUrl documents.documentDescription documents.documentSource documents.type", // Alt belgeleri al, türü de ekledik
       });
   
       if (!application) {
@@ -153,6 +154,7 @@ export const getAllApplicationsService = async (documentType?: string) => {
           documentUrl: docDetails?.documentUrl || "URL bulunamadı",
           documentSource: docDetails?.documentSource || "", // documentSource'u ekliyoruz
           documentDescription: docDetails?.documentDescription || "Dosya",
+          type: docDetails?.type || "Tür belirtilmedi", // Yeni: Tür alanını ekledik
         };
       });
   
@@ -161,7 +163,8 @@ export const getAllApplicationsService = async (documentType?: string) => {
       console.error("Başvuru bilgileri getirilirken hata oluştu:", error);
       throw new Error("Başvuru bilgileri alınırken bir hata oluştu.");
     }
-  };   
+  };
+   
 
   export const updateApplicationService = async (req: Request, id: string) => {
     const updatedFields = { ...req.body };

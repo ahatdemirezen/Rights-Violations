@@ -325,33 +325,49 @@ useEffect(() => {
     s3Files.map((file, index) => (
       <div
         key={index}
-        className="my-2 p-4 border rounded bg-[#FFFBF0] flex items-center justify-between shadow-sm"
+        className="my-2 p-4 border rounded bg-[#FFFBF0] flex flex-col shadow-sm"
       >
-        {/* Sol Taraf: İkon ve Açıklama */}
-        <div className="flex items-center">
-          <FontAwesomeIcon
-            icon={faFileAlt}
-            className="text-[#D4AF37] text-2xl mr-3"
-          />
+        {/* Açıklama ve Tür Alanı */}
+        <div className="flex justify-between">
           <div>
             <p className="text-gray-700 font-medium">
               Açıklama: {file.documentDescription || `Açıklama ${index + 1}`}
             </p>
-            {/* Dosya Türü Gösterimi */}
-            {file.type && (
-              <p className="text-gray-500 text-sm">Tür: {file.type}</p>
-            )}
+            <p className="text-gray-500 text-sm">
+              Tür:{" "}
+              <select
+                value={file.type || ""}
+                onChange={(e) => {
+                  const updatedFiles = [...s3Files];
+                  updatedFiles[index] = {
+                    ...updatedFiles[index],
+                    type: e.target.value,
+                  };
+                  setFormData((prev) => ({
+                    ...prev,
+                    documents: updatedFiles, // documents içine güncellenmiş dosyaları koy
+                  }));
+                }}
+                className="border p-1 rounded text-sm"
+              >
+                <option value="">Tür Seçin</option>
+                <option value="Media Screening">Media Screening</option>
+                <option value="NGO Data">NGO Data</option>
+                <option value="Bar Commissions">Bar Commissions</option>
+                <option value="Public Institutions">Public Institutions</option>
+                <option value="Other">Other</option>
+              </select>
+            </p>
           </div>
-
         </div>
- 
-        {/* Sağ Taraf: Link */}
+
+        {/* Dosya Linki */}
         {file.documentSource ? (
           <a
             href={file.documentSource}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            className="text-blue-500 hover:underline mt-2"
           >
             Linki Görüntüle
           </a>
@@ -360,7 +376,7 @@ useEffect(() => {
             href={file.documentUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            className="text-blue-500 hover:underline mt-2"
           >
             Dosyayı Görüntüle
           </a>
@@ -373,6 +389,7 @@ useEffect(() => {
     <p className="text-gray-500">Mevcut dosya veya link bulunamadı.</p>
   )}
 </div>
+
 
 
 
@@ -435,12 +452,7 @@ useEffect(() => {
       }
       className="w-full p-2 border border-gray-300 rounded"
     >
-      <option value="">Tür Seçin</option>
-      <option value="Media Screening">Media Screening</option>
-      <option value="NGO Data">NGO Data</option>
-      <option value="Bar Commissions">Bar Commissions</option>
-      <option value="Public Institutions">Public Institutions</option>
-      <option value="Other">Other</option>
+ 
     </select>
   </div>
 )}

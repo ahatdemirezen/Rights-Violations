@@ -82,8 +82,8 @@ const ApplicationListPage = () => {
 
   return (
     <div className="flex justify-center bg-[#F0F0F0] min-h-screen py-6">
-      <div className="max-w-5xl w-full p-6 bg-[#fdf8f0] rounded-lg shadow-lg">
-      <div className="flex justify-between items-center mb-6">
+<div className="w-full max-w-7xl p-6 bg-[#fdf8f0] rounded-lg shadow-lg overflow-hidden">
+<div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#123D3D]">Başvuru Listesi</h1>
         <button
           onClick={() => navigate("/admin/new-application")}
@@ -159,60 +159,52 @@ const ApplicationListPage = () => {
                 <th className="px-4 py-2">Başvuru No</th>
                 <th className="px-4 py-2">Tarih</th>
                 <th className="px-4 py-2">Durum</th>
+                <th className="px-4 py-2">Dava Durumu</th> {/* Yeni başlık */}
                 <th className="px-4 py-2">İşlemler</th>
               </tr>
             </thead>
             <tbody>
-              {filteredApplications.map((app) => (
-                <tr
-                  key={app._id}
-                  className="hover:bg-[#D5C4A1] text-[#123D3D] transition"
-                >
-                  <td className="px-4 py-2 border-b">
-                    {app.applicantName || app.organizationName}
-                  </td>
-                  <td className="px-4 py-2 border-b">{app.applicationType}</td>
-                  <td className="px-4 py-2 border-b">{app.applicationNumber}</td>
-                  <td className="px-4 py-2 border-b">
-                    {new Date(app.applicationDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2 border-b">{app.status}</td>
-                  <td className="px-4 py-2 border-b">
-                  <div
-  className={`flex ${
-    app.status === "approved" && !app.lawsuitCreated
-      ? "justify-center space-x-2"
-      : app.status === "approved" && app.lawsuitCreated
-      ? "justify-center"
-      : "justify-center"
-  }`}
->
-  <button
-    onClick={() => handleOpenModal(app)}
-    className="bg-[#123D3D] border border-[#D4AF37] text-[#D4AF37] px-3 py-1.5 rounded font-medium shadow-md hover:bg-[#D5C4A1] transition"
-  >
-    Detay
-  </button>
-  {app.status === "approved" ? (
-    app.lawsuitCreated ? (
-      <span className="#123D3D">Davası Oluşturulmuştur</span>
-    ) : (
-      <button
-        onClick={() => handleOpenLawsuitModal(app)}
-        className="bg-[#123D3D] border border-[#D4AF37] text-[#D4AF37] px-3 py-1.5 rounded font-medium shadow-md hover:bg-[#D5C4A1] transition"
-      >
-        Dava Oluştur
-      </button>
-    )
-  ) : null}
-</div>
+  {filteredApplications.map((app) => (
+    <tr
+      key={app._id}
+      className="hover:bg-[#D5C4A1] text-[#123D3D] transition"
+    >
+      <td className="px-4 py-2 border-b">
+        {app.applicantName || app.organizationName}
+      </td>
+      <td className="px-4 py-2 border-b">{app.applicationType}</td>
+      <td className="px-4 py-2 border-b">{app.applicationNumber}</td>
+      <td className="px-4 py-2 border-b">
+        {new Date(app.applicationDate).toLocaleDateString()}
+      </td>
+      <td className="px-4 py-2 border-b">{app.status}</td>
+      {/* Dava Durumu Sütunu */}
+      <td className="px-4 py-2 border-b text-center">
+        {app.lawsuitCreated ? "Oluşmuştur" : ""}
+      </td>
+      {/* İşlemler Sütunu */}
+      <td className="px-4 py-2 border-b">
+        <div className="flex justify-center space-x-2">
+          <button
+            onClick={() => handleOpenModal(app)}
+            className="bg-[#123D3D] border border-[#D4AF37] text-[#D4AF37] px-3 py-1.5 rounded font-medium shadow-md hover:bg-[#D5C4A1] transition"
+          >
+            Detay
+          </button>
+          {app.status === "approved" && !app.lawsuitCreated && (
+            <button
+              onClick={() => handleOpenLawsuitModal(app)}
+              className="bg-[#123D3D] border border-[#D4AF37] text-[#D4AF37] px-3 py-1.5 rounded font-medium shadow-md hover:bg-[#D5C4A1] transition"
+            >
+              Dava Oluştur
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  ))}
+</tbody>
 
-</td>
-
-
-                </tr>
-              ))}
-            </tbody>
           </table>
         </div>
       )}

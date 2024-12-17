@@ -43,7 +43,6 @@ export const processDocuments = async (
   for (let i = 0; i < files.length; i++) {
     const description = descriptions.files[i] || `Document ${i + 1}`;
     const type = types.files[i] || "Other";
-
     const s3Response = await uploadToS3(files[i]);
     const documentUrl = s3Response.files[0]?.url;
 

@@ -11,6 +11,7 @@ export interface IApplication extends Document {
   lawyer: Types.ObjectId | null; // Avukat referansı (User şemasına bağlanır)
   address: string; // Adres
   phoneNumber: string; // Telefon numarası
+  email: string; // Yeni eklenen email alanı
   complaintReason: string; // Yakınma veya ihlal nedenleri
   eventCategories: string; // Olay kategorileri referansı
   documents: Types.ObjectId[]; // Doküman referansları (Document modeli)
@@ -19,6 +20,7 @@ export interface IApplication extends Document {
   lawsuitCreated?: boolean; // Arşiv durumu (true veya false)
 }
 
+// Çoğu değer geçici olarak false yapılmıştır!
 // Define the Mongoose schema
 const ApplicationSchema = new Schema<IApplication>(
   {
@@ -26,21 +28,30 @@ const ApplicationSchema = new Schema<IApplication>(
     receivedBy: { type: String, default: null },
     applicantName: {
       type: String,
-      required: function (this: IApplication) {
-        return this.applicationType === "individual"; // Kurum adı sadece "organization" türünde zorunlu
-      },
-    },    nationalID: { type: String, required: true, unique: true, minlength: 11, maxlength: 11 },
-    applicationType: { type: String, enum: ["organization", "individual"], required: true },
+      required: false,
+    },   
+    nationalID: { type: String, required: false, unique: true, minlength: 11, maxlength: 11 }, //unique geçici olarak false yapılmıştır
+    applicationType: { type: String, enum: ["organization", "individual"], required: false },
     organizationName: {
       type: String,
-      required: function (this: IApplication) {
-        return this.applicationType === "organization"; // Kurum adı sadece "organization" türünde zorunlu
-      },
+      required: false, // Her durumda zorunlu değil
     },
-    applicationDate: { type: Date, required: true },
-    address: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
-    complaintReason: { type: String, required: true },
+    
+    applicationDate: { type: Date, required: false },
+    address: { type: String, required: false },
+    phoneNumber: {
+      type: String,
+      required: false,
+      match: [/^(\+90|0)?\d{10}$/, "Geçerli bir telefon numarası giriniz. Örn: 5XXXXXXXXX"],
+      minlength: 10,
+      maxlength: 11,
+    },
+    email: {
+      type: String,
+      required: false,
+      match: [/^\S+@\S+\.\S+$/, "Geçerli bir email adresi giriniz. Örn: example@mail.com"],
+    },
+    complaintReason: { type: String, required: false },
     eventCategories: {
       type: String, // Array of strings
       enum: [

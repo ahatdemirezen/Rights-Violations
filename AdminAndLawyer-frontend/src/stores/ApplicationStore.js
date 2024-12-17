@@ -50,18 +50,26 @@ const useApplicationStore = () => {
         console.log(pair[0], pair[1]);
       }
   
-      await axiosInstance.post("/applications", formData, {
+      const response = await axiosInstance.post("/applications", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   
-      alert("Başvuru başarıyla oluşturuldu!");
+      // Başarılı işlem sonucunu döndür
+      return response.data;
     } catch (err) {
       console.error("Başvuru oluşturulamadı:", err);
-      alert("Başvuru oluşturulurken hata oluştu.");
+  
+      // Hata durumunu backend'den dönen veriyle ilet
+      if (err.response) {
+        throw err.response.data; // Backend'den dönen hata mesajını yukarı iletir
+      } else {
+        throw { error: "Başvuru Oluşturma Sırasında Hata" };
+      }
     } finally {
       setLoading(false);
     }
   };
+  
   
   
   const fetchApplications = async () => {

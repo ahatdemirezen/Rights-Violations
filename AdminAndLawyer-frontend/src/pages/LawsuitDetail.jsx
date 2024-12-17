@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams , useNavigate } from "react-router-dom";
 import useLawsuitListPageStore from "../stores/LawsuitListPageStore";
 import { FaFolder, FaFileAlt } from "react-icons/fa"; // Simge için ikonlar
 
@@ -13,6 +13,7 @@ const LawsuitDetails = () => {
     error,
   } = useLawsuitListPageStore();
 
+  const navigate = useNavigate(); // Navigate hook'u kullanılır
   const [isEditing, setIsEditing] = useState(false); // Düzenleme modunu kontrol eder
   const [formData, setFormData] = useState({}); // Formdaki güncellenen veriler
   const [newFiles, setNewFiles] = useState([]); // Yeni yüklenen dosyalar
@@ -31,6 +32,7 @@ const LawsuitDetails = () => {
       setFormData({
         applicationNumber: selectedLawsuit.applicationNumber,
         applicantName: selectedLawsuit.applicantName,
+        organizationName: selectedLawsuit.organizationName,
         lawyer: selectedLawsuit.applicationId?.lawyer?.name || "Bilinmiyor", // Avukat bilgisini kontrol et
         courtFileNo: selectedLawsuit.courtFileNo,
         caseSubject: selectedLawsuit.caseSubject,
@@ -44,11 +46,15 @@ const LawsuitDetails = () => {
     }
   }, [selectedLawsuit]);
   
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
+  
+  const handleNavigateToFile = (fileUrl) => {
+    navigate(fileUrl); // URL'yi navigate ile yönlendir
+  };
+
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files); // Dosyaları al
@@ -151,6 +157,18 @@ const LawsuitDetails = () => {
                     type="text"
                     name="applicantName"
                     value={formData.applicantName || ""}
+                    disabled
+                    className="w-full border border-[#D5C4A1] rounded-md p-2 mt-1 bg-[#ededed] text-[#123D3D]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#123D3D]">
+                    Kurum Adı
+                  </label>
+                  <input
+                    type="text"
+                    name="organizationName"
+                    value={formData.organizationName || ""}
                     disabled
                     className="w-full border border-[#D5C4A1] rounded-md p-2 mt-1 bg-[#ededed] text-[#123D3D]"
                   />

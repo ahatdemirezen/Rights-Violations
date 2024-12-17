@@ -33,7 +33,8 @@ export const createLawsuitWithFilesService = async (
     }
 
     const applicationNumber = applicationExists.applicationNumber;
-    const applicantName = applicationExists.applicantName;
+    const applicantName = applicationExists.applicantName || "";
+    const organizationName = applicationExists.organizationName || ""; // Eklenen kısım
 
     // 2. Dosyaları S3'e yükle ve FileModel'e kaydet
     const uploadedFiles = await Promise.all(
@@ -61,6 +62,7 @@ export const createLawsuitWithFilesService = async (
       applicationId,
       applicationNumber,
       applicantName,
+      organizationName, // Eklenen kısım
       caseSubject,
       fileNumber,
       courtFileNo,
@@ -114,7 +116,7 @@ export const getLawsuitByIdService = async (lawsuitId: string) => {
     // Tüm davaları al ve applicationId üzerinden lawyer bilgilerini de getir
     const lawsuits = await LawsuitTrackingModel.find()
       .select(
-        "applicationNumber applicantName caseSubject fileNumber court courtFileNo caseNumber lawsuitDate createdAt updatedAt archive"
+        "applicationNumber applicantName organizationName caseSubject fileNumber court courtFileNo caseNumber lawsuitDate createdAt updatedAt archive"
       ) // Sadece gerekli alanları seç
       .populate({
         path: "applicationId", // Application bilgilerini getir

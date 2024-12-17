@@ -6,6 +6,7 @@
     applicationId: Types.ObjectId | IApplication; // Referans veya populate sonrası detaylar
     applicationNumber: number; // Başvuru numarası
     applicantName: string;
+    organizationName?: string; // Organization adı, Application modelinden gelir
     courtFileNo: string;
     caseSubject: string; // Dava Konusu
     fileNumber: string; // Dosya No
@@ -20,6 +21,7 @@
     updatedAt?: Date; // Automatically updated timestamp
   }
 
+  //Çoğu değer geçici olarak false yapılmıştır!
   // Define the Mongoose schema
   const LawsuitTrackingSchema = new Schema<ILawsuitTracking>(
       {
@@ -34,8 +36,13 @@
         },
         applicantName: {
           type : String,
-          required: true,
+          required: false,
         },
+        organizationName: { 
+          type: String, 
+          required: false, 
+          default: null, 
+        }, // Organization adı
       courtFileNo: { type: String , required: false },
       caseSubject: { type: String, required: false }, // Dava Konusu
  

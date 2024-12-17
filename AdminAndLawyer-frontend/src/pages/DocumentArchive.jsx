@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, Typography, Grid, CardActions, Button, Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { FaFolder, FaFileAlt, FaLink } from "react-icons/fa"; // İkonlar
 import useDocumentStore from "../stores/DocumentStore";
 import SearchBar from "../components/SearchBar";
 
 const DocumentList = () => {
   const { documents, fetchDocuments, loading, error } = useDocumentStore();
-  const [filterType, setFilterType] = useState(""); // Tür için filtreleme
-  const [filterDocumentType, setFilterDocumentType] = useState(""); // Dosya tipi için filtreleme
-  const [searchTerm, setSearchTerm] = useState(""); // Arama çubuğu için terim
+  const [filterType, setFilterType] = useState("");
+  const [filterDocumentType, setFilterDocumentType] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredDocuments, setFilteredDocuments] = useState([]);
 
   useEffect(() => {
-    fetchDocuments(); // Tüm dökümanları getirme isteği
+    fetchDocuments();
   }, [fetchDocuments]);
 
   useEffect(() => {
-    // Filtreleme ve arama işlemi
     let filtered = documents;
 
     if (filterType) {
@@ -33,59 +32,54 @@ const DocumentList = () => {
     if (searchTerm) {
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       filtered = filtered.filter((doc) =>
-        doc.documents[0]?.documentDescription?.toLowerCase().includes(lowerCaseSearchTerm)
+        doc.documents[0]?.documentDescription
+          ?.toLowerCase()
+          .includes(lowerCaseSearchTerm)
       );
     }
 
     setFilteredDocuments(filtered);
   }, [filterType, filterDocumentType, searchTerm, documents]);
 
-  if (loading) return <Typography variant="h6" align="center" mt={4}>Yükleniyor...</Typography>;
-  if (error) return <Typography variant="h6" align="center" mt={4} color="error">{error}</Typography>;
+  if (loading)
+    return <p className="text-center text-[#123D3D]">Yükleniyor...</p>;
+
+  if (error)
+    return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <Box sx={{ padding: 3, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
-      <Typography 
-        variant="h4" 
-        align="center" 
-        gutterBottom 
-        sx={{ fontWeight: "bold", color: "#333", marginBottom: 4 }}
-      >
+    <div className="bg-[#F8F1E8] min-h-screen p-4">
+      {/* Başlık */}
+      <h1 className="text-3xl font-bold text-[#123D3D] text-center mb-6">
         Döküman Listesi
-      </Typography>
+      </h1>
 
-      {/* Filtreleme ve Arama Bölümü */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 4, marginBottom: 4 }}>
+      {/* Filtreleme ve Arama */}
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         {/* Tür Filtreleme */}
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel id="filter-type-label">Tür Seçin</InputLabel>
-          <Select
-            labelId="filter-type-label"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <MenuItem value="">Tüm Türler</MenuItem>
-            <MenuItem value="Media Screening">Media Screening</MenuItem>
-            <MenuItem value="NGO Data">NGO Data</MenuItem>
-            <MenuItem value="Bar Commissions">Bar Commissions</MenuItem>
-            <MenuItem value="Public Institutions">Public Institutions</MenuItem>
-            <MenuItem value="Other">Other</MenuItem>
-          </Select>
-        </FormControl>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="w-48 border border-[#D5C4A1] p-2 rounded bg-white text-[#123D3D]"
+        >
+          <option value="">Tüm Türler</option>
+          <option value="Media Screening">Medya Taraması</option>
+          <option value="NGO Data">STK Verileri</option>
+          <option value="Bar Commissions">Baro Komisyonları</option>
+          <option value="Public Institutions">Kamu Kurumları</option>
+          <option value="Other">Diğer</option>
+        </select>
 
         {/* Dosya Tipi Filtreleme */}
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel id="filter-document-type-label">Dosya Tipi</InputLabel>
-          <Select
-            labelId="filter-document-type-label"
-            value={filterDocumentType}
-            onChange={(e) => setFilterDocumentType(e.target.value)}
-          >
-            <MenuItem value="">Tüm Tipler</MenuItem>
-            <MenuItem value="files">Dosya</MenuItem>
-            <MenuItem value="link">Link</MenuItem>
-          </Select>
-        </FormControl>
+        <select
+          value={filterDocumentType}
+          onChange={(e) => setFilterDocumentType(e.target.value)}
+          className="w-48 border border-[#D5C4A1] p-2 rounded bg-white text-[#123D3D]"
+        >
+          <option value="">Tüm Tipler</option>
+          <option value="files">Dosya</option>
+          <option value="link">Link</option>
+        </select>
 
         {/* Arama Çubuğu */}
         <SearchBar
@@ -93,90 +87,59 @@ const DocumentList = () => {
           onChange={setSearchTerm}
           placeholder="Açıklamaya göre ara..."
         />
-      </Box>
+      </div>
 
-      <Grid container spacing={3}>
+      {/* Kartlar */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {filteredDocuments.map((document, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card
-              variant="outlined"
-              sx={{
-                boxShadow: 3,
-                borderRadius: 2,
-                transition: "transform 0.2s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.02)",
-                },
-                height: "100%",
-              }}
-            >
-              <CardContent sx={{ padding: 3 }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold", color: "#555" }}
-                >
-                  Açıklama:
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ marginBottom: 2, color: "#444" }}
-                >
-                  {document.documents[0]?.documentDescription || "Açıklama Yok"}
-                </Typography>
+          <div
+            key={index}
+            className="relative group border border-[#D5C4A1] rounded-lg shadow-lg hover:shadow-2xl transition bg-white p-3 flex flex-col items-center justify-between"
+          >
+            {/* Dosya İkonu */}
+            <div className="text-[#e2be47] text-5xl mb-2">
+              {document.documents[0]?.documentType === "files" ? (
+                <FaFileAlt />
+              ) : (
+                <FaLink />
+              )}
+            </div>
 
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold", color: "#555", marginTop: 2 }}
-                >
-                  Tür:
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ color: "#444" }}
-                >
+            {/* Dosya Bilgileri */}
+            <div className="text-center">
+              {/* Açıklama */}
+              <h2 className="text-md font-semibold text-[#123D3D] mb-1">
+                Açıklama:{" "}
+                <span className="font-normal text-gray-700">
+                  {document.documents[0]?.documentDescription || "Açıklama Yok"}
+                </span>
+              </h2>
+              {/* Tür */}
+              <p className="text-sm text-gray-600 mt-1">
+                Tür:{" "}
+                <span className="font-normal">
                   {document.documents[0]?.type || "Tür Belirtilmemiş"}
-                </Typography>
-              </CardContent>
-              <CardActions
-                sx={{
-                  justifyContent: "center",
-                  padding: 2,
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                {document.documents[0]?.documentType === "files" ? (
-                  <Button
-                    size="medium"
-                    variant="contained"
-                    color="primary"
-                    href={document.documents[0]?.documentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Dosyayı Görüntüle
-                  </Button>
-                ) : (
-                  <Button
-                    size="medium"
-                    variant="contained"
-                    color="secondary"
-                    href={document.documents[0]?.documentSource}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Linki Görüntüle
-                  </Button>
-                )}
-              </CardActions>
-            </Card>
-          </Grid>
+                </span>
+              </p>
+            </div>
+
+            {/* Hover Efekti */}
+            <a
+              href={
+                document.documents[0]?.documentType === "files"
+                  ? document.documents[0]?.documentUrl
+                  : document.documents[0]?.documentSource
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 text-white font-medium text-sm rounded-lg transition-opacity"
+            >
+              Görmek için tıklayın
+            </a>
+          </div>
         ))}
-      </Grid>
-    </Box>
+      </div>
+    </div>
   );
 };
 

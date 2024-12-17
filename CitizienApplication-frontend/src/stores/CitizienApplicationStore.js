@@ -54,134 +54,13 @@ const CitizenApplicationStore = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
   
-      alert("Başvuru başarıyla oluşturuldu!");
     } catch (err) {
       console.error("Başvuru oluşturulamadı:", err);
-      alert("Başvuru oluşturulurken hata oluştu.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  
-  const fetchApplications = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-        const response = await axios.get(`${apiUrl}/applications/applications`);
-        setApplications(response.data);
-    } catch (err) {
-      handleError(err, "Veriler alınırken bir hata oluştu!");
     } finally {
       setLoading(false);
     }
   };
 
-
-  const fetchDocumentTypes = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`${apiUrl}/applications/api/document-types`);
-      setDocumentTypes(response.data.documentTypes || []);
-    } catch (err) {
-      handleError(err, "Dosya türleri alınırken bir hata oluştu!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchApplicationById = async (id) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`${apiUrl}/applications/${id}`);
-      setS3Files(response.data.s3Files || []);
-      return response.data;
-    } catch (err) {
-      handleError(err, "Başvuru verisi alınırken bir hata oluştu!");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateApplication = async (id, updatedData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-  
-      // Text alanlarını ekleme
-      Object.entries(updatedData).forEach(([key, value]) => {
-        if (
-          !["files", "links", "lawyer" , "eventCategories" ].includes(key) &&
-          value !== undefined &&
-          value !== null
-        ) {
-          formData.append(key, value);
-        }
-      });
-  
-        // EventCategories alanını string olarak ekleme
-    if (updatedData.eventCategories) {
-      const eventCategory =
-        Array.isArray(updatedData.eventCategories) &&
-        updatedData.eventCategories.length > 0
-          ? updatedData.eventCategories[0] // Array ise ilk elemanı al
-          : updatedData.eventCategories; // Değilse doğrudan ekle
-      formData.append("eventCategories", eventCategory);
-    }
-
-      // Dosyaları ekleme
-      if (Array.isArray(updatedData.files) && updatedData.files.length > 0) {
-        updatedData.files.forEach((file, index) => {
-          formData.append("files", file.file || file); // Dosya nesnesi
-          formData.append(`descriptions[files][${index}]`, file.description || `File ${index + 1}`); // Dosya açıklaması
-          formData.append(`types[files][${index}]`, file.type || "Other"); // Dosya türü
-        });
-      }
-  
-      // Linkleri ekleme
-      if (Array.isArray(updatedData.links) && updatedData.links.length > 0) {
-        updatedData.links.forEach((link, index) => {
-          formData.append(`links[${index}]`, link.url || ""); // Link URL'si
-          formData.append(`descriptions[links][${index}]`, link.description || `Link ${index + 1}`); // Link açıklaması
-          formData.append(`types[links][${index}]`, link.type || "Other"); // Link türü
-        });
-      }
-  
-      // Lawyer alanını ekleme
-      if (updatedData.lawyer) {
-        formData.append("lawyer", updatedData.lawyer); // Lawyer ID'sini FormData'ya ekle
-      }
-  
-      // FormData'yı logla
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-  
-      // PUT isteği gönder
-      const response = await axios.put(`${apiUrl}/applications/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-  
-      // Başvuru listesini güncelle
-      setApplications((prev = []) =>
-        Array.isArray(prev)
-          ? prev.map((app) => (app._id === id ? response.data : app))
-          : []
-      );
-  
-      console.log("Başvuru başarıyla güncellendi:", response.data);
-    } catch (err) {
-      handleError(err, "Başvuru güncellenirken bir hata oluştu!");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  
 
   return {
     applications,
@@ -189,10 +68,6 @@ const CitizenApplicationStore = () => {
     s3Files,
     loading,
     error,
-    fetchApplications,
-    fetchDocumentTypes,
-    fetchApplicationById,
-    updateApplication,
     createCitizenApplication, // Yeni eklenen fonksiyon
   };
 };

@@ -16,6 +16,7 @@ export const createApplicationService = async (applicationData: any, files: any)
     organizationName,
     address,
     phoneNumber,
+    email,
     complaintReason,
     eventCategories,
     links = [],
@@ -23,10 +24,10 @@ export const createApplicationService = async (applicationData: any, files: any)
     types = [],
   } = applicationData;
 
-  // Zorunlu alan kontrolü
-  if (!nationalID || !applicationType || !applicationDate || !eventCategories) {
-    throw new Error("Zorunlu alanlar eksik!");
-  }
+  const existingApplication = await ApplicationModel.findOne({ nationalID });
+  if (existingApplication) {
+    throw new Error("Bu TC Kimlik Numarası ile zaten bir başvuru yapılmıştır.");
+  }  
 
   // Event categories doğrulama
   const validCategories = [
@@ -104,6 +105,7 @@ export const createApplicationService = async (applicationData: any, files: any)
     applicationDate,
     address,
     phoneNumber,
+    email,
     complaintReason,
     eventCategories,
     documents,

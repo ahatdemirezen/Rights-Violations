@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import useApplicationStore from "../stores/ApplicationStore";
 import useLawyerListPageStore from "../stores/LawyerListPageStore"; // Avukat listesini getiren store
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileAlt } from "@fortawesome/free-solid-svg-icons";
 
 const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -119,8 +121,10 @@ useEffect(() => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white w-3/4 rounded shadow-lg p-6">
-        <h2 className="text-xl font-bold mb-4">Başvuru Düzenle</h2>
-        <div className="grid grid-cols-2 gap-4">
+      <h2 className="text-2xl font-bold mb-6 text-[#8B0000] border-b-4 border-[#D4AF37] pb-2">
+        Başvuru Düzenle
+      </h2>        
+      <div className="grid grid-cols-2 gap-4">
            {/* TC Kimlik Numarası */}
            <div>
             <label className="block text-gray-700">T.C. Kimlik Numarası:</label>
@@ -316,22 +320,38 @@ useEffect(() => {
     </div>
 ))}
 
-<div>
-  <label className="block text-gray-700">Mevcut Dosyalar ve Linkler:</label>
+<div className="max-h-[200px] overflow-y-auto border border-gray-300 rounded p-2 mt-2 bg-white">
   {Array.isArray(s3Files) && s3Files.length > 0 ? (
     s3Files.map((file, index) => (
-      <div key={index} className="my-2 p-2 border rounded bg-gray-100">
-        {/* Açıklama alanı */}
-        <p className="text-gray-700 font-semibold">
-          Açıklama: {file.documentDescription || `Dosya ${index + 1}`}
-        </p>
-        {/* DocumentSource veya DocumentUrl kontrolü */}
+      <div
+        key={index}
+        className="my-2 p-4 border rounded bg-[#FFFBF0] flex items-center justify-between shadow-sm"
+      >
+        {/* Sol Taraf: İkon ve Açıklama */}
+        <div className="flex items-center">
+          <FontAwesomeIcon
+            icon={faFileAlt}
+            className="text-[#D4AF37] text-2xl mr-3"
+          />
+          <div>
+            <p className="text-gray-700 font-medium">
+              Açıklama: {file.documentDescription || `Açıklama ${index + 1}`}
+            </p>
+            {/* Dosya Türü Gösterimi */}
+            {file.type && (
+              <p className="text-gray-500 text-sm">Tür: {file.type}</p>
+            )}
+          </div>
+
+        </div>
+ 
+        {/* Sağ Taraf: Link */}
         {file.documentSource ? (
           <a
             href={file.documentSource}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 underline"
+            className="text-blue-500 hover:underline"
           >
             Linki Görüntüle
           </a>
@@ -340,12 +360,12 @@ useEffect(() => {
             href={file.documentUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 underline"
+            className="text-blue-500 hover:underline"
           >
             Dosyayı Görüntüle
           </a>
         ) : (
-          <span className="text-red-500">URL bulunamadı</span>
+          <span className="text-red-500">URL Bulunamadı</span>
         )}
       </div>
     ))
@@ -353,6 +373,8 @@ useEffect(() => {
     <p className="text-gray-500">Mevcut dosya veya link bulunamadı.</p>
   )}
 </div>
+
+
 
 
 <div>
@@ -372,6 +394,7 @@ useEffect(() => {
 {formData.documentType === "files" && (
   <div>
     <label className="block text-gray-700">Dosya Yükleme:</label>
+    
     <input
       type="file"
       multiple
@@ -426,14 +449,14 @@ useEffect(() => {
         <div className="mt-6 flex justify-end space-x-4">
           <button
             onClick={onClose}
-            className="bg-gray-500 text-white px-4 py-2 rounded"
-          >
+            className="bg-[#8B0000] text-white px-4 py-2 rounded font-medium hover:bg-[#D4AF37] transition"
+            >
             Kapat
           </button>
           <button
             onClick={handleSave}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
+            className=" px-4 py-2 bg-[#183D3D] text-[#D5C4A1] rounded-md text-sm font-medium transition hover:shadow-lg"
+            >
             Kaydet 
           </button>
         </div>

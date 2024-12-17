@@ -33,8 +33,14 @@ export const uploadToS3 = async (file: Express.Multer.File): Promise<any> => { /
     return s3Response; 
 
   } catch (error: any) {
-    console.error('S3 Yükleme Hatası:', error.response?.data || error.message);
-    throw new Error(`S3 yüklemesinde hata: ${error.response?.data?.message || error.message}`);
+    console.error("S3 Yükleme Hatası:", error.response?.data || error.message);
+  
+    // Hata objesini olduğu gibi geri döndür
+    if (error.response) {
+      throw error.response.data; // Response verisini direkt geri döner
+    } else {
+      throw { message: "S3 yüklemesinde bilinmeyen bir hata oluştu.", details: error.message };
+    }
   }
 };
 

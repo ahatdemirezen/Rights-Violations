@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { ApplicationModel } from "../models/application-model";
 import { DocumentModel } from "../models/document-model";
-import { deleteFileFromS3, uploadToS3 } from "./S3-controller";
+import { uploadToS3 } from "./S3-controller";
 import { Types } from "mongoose"; // `Types` import edildi  
 
 // Yardımcı Fonksiyon: DocumentModel Kaydet
@@ -39,6 +39,7 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
     const {
       applicantName,
       nationalID,
+      email,
       applicationType,
       applicationDate,
       organizationName,
@@ -130,6 +131,7 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
       applicantName,
       organizationName,
       nationalID,
+      email,
       applicationType,
       applicationDate,
       address,
@@ -151,23 +153,6 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
     res.status(500).json({ error: "Başvuru oluşturulurken hata oluştu." });
   }
 };
-export const getDocumentTypes = async (req: Request, res: Response): Promise<void>  => {
-  try {
-    // Sabit tür listesini tanımlayın
-    const documentTypes = [
-      "Media Screening",
-      "NGO Data",
-      "Bar Commissions",
-      "Public Institutions",
-      "Other",
-    ];
 
-    // Tür listesini dön
-    res.status(200).json({ documentTypes });
-  } catch (error) {
-    console.error("Hata:");
-    res.status(500).json({ error: "Dosya türleri alınamadı." });
-  }
-};
 
 export default createApplicationcitizen;

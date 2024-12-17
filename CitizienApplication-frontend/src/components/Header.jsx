@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { FaTwitter, FaGoogle, FaInstagram } from "react-icons/fa"; // İkonlar için
 import { MdKeyboardArrowDown } from "react-icons/md"; // Açılır menü için ikon
+import { useNavigate } from "react-router-dom"; // Sayfa içi yönlendirme için
 import AtaturkPhoto from "../assets/ataturk.png"; // Atatürk fotoğrafının yolu
 import UrfaLogo from "../assets/baro.jpeg"; // Logo için görüntü yolu
 
 const Header = () => {
   const [isSSSOpen, setSSSOpen] = useState(false); // SSS menü durumu
   const [isContactOpen, setContactOpen] = useState(false); // İletişim menü durumu
+
+  const navigate = useNavigate(); // Sayfa içi yönlendirme için useNavigate
+
+  const handleExternalLink = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <header className="w-full bg-[#EAEAEA] shadow-md">
@@ -38,13 +45,22 @@ const Header = () => {
               </button>
               {isSSSOpen && (
                 <ul className="absolute bg-black bg-opacity-80 backdrop-blur-md text-white border border-gray-600 rounded-md shadow-lg mt-2 py-2 w-48 text-left z-10">
-                  <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer rounded-md">
+                  <li
+                    onClick={() => navigate("/sss/soru1")}
+                    className="px-4 py-2 hover:bg-gray-700 cursor-pointer rounded-md"
+                  >
                     Soru 1
                   </li>
-                  <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer rounded-md">
+                  <li
+                    onClick={() => navigate("/sss/soru2")}
+                    className="px-4 py-2 hover:bg-gray-700 cursor-pointer rounded-md"
+                  >
                     Soru 2
                   </li>
-                  <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer rounded-md">
+                  <li
+                    onClick={() => navigate("/sss/soru3")}
+                    className="px-4 py-2 hover:bg-gray-700 cursor-pointer rounded-md"
+                  >
                     Soru 3
                   </li>
                 </ul>
@@ -77,15 +93,15 @@ const Header = () => {
 
           {/* Sosyal Medya İkonları */}
           <div className="flex items-center space-x-6">
-            <a href="https://twitter.com" target="_blank" rel="noreferrer">
+            <button onClick={() => handleExternalLink("https://twitter.com")}>
               <FaTwitter className="text-[#555] text-2xl hover:text-[#123D3D] transition" />
-            </a>
-            <a href="https://google.com" target="_blank" rel="noreferrer">
+            </button>
+            <button onClick={() => handleExternalLink("https://google.com")}>
               <FaGoogle className="text-[#555] text-2xl hover:text-[#123D3D] transition" />
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer">
+            </button>
+            <button onClick={() => handleExternalLink("https://instagram.com")}>
               <FaInstagram className="text-[#555] text-2xl hover:text-[#123D3D] transition" />
-            </a>
+            </button>
           </div>
         </div>
 
@@ -96,7 +112,9 @@ const Header = () => {
             alt="Atatürk"
             className="h-20 rounded-full object-cover mx-auto"
           />
-          <p className="mt-2 text-lg italic font-serif text-[#123D3D]">“Adalet mülkün temelidir”</p>
+          <p className="mt-2 text-lg italic font-serif text-[#123D3D]">
+            “Adalet mülkün temelidir”
+          </p>
         </div>
       </div>
     </header>

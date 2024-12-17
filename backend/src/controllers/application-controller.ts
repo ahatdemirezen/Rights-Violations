@@ -16,9 +16,21 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
       message: "Başvuru başarıyla oluşturuldu.",
       application: result,
     });
-  } catch (error) {
+  }  catch (error) {
     console.error("Başvuru oluşturulurken hata:", error);
-    res.status(500).json({ error: "Başvuru oluşturulurken hata oluştu." });
+
+    // Hata tipini kontrol et
+    if (error instanceof Error) {
+      // TC Kimlik Numarası için özel hata kontrolü
+      if (error.message === "Bu TC Kimlik Numarası ile zaten bir başvuru yapılmıştır.") {
+        res.status(400).json({ error: error.message });
+        return;
+      }
+      res.status(500).json({ error: "Başvuru oluşturulurken bir hata oluştu." });
+    } else {
+      // Error nesnesi değilse genel hata mesajı
+      res.status(500).json({ error: "Bilinmeyen bir hata oluştu." });
+    }
   }
 };
 

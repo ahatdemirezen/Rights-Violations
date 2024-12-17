@@ -32,6 +32,7 @@ const LawsuitList = () => {
       const searchLower = searchTerm.toLowerCase();
       return (
         lawsuit.applicantName?.toLowerCase().includes(searchLower) ||
+        lawsuit.organizationName?.toLowerCase().includes(searchLower) ||
         lawsuit.applicationId?.lawyer?.name?.toLowerCase().includes(searchLower) || // Lawyer ismini filtrele
         lawsuit.applicationNumber?.toString().includes(searchLower) || // Başvuru numarasını filtrele
         lawsuit.court?.toLowerCase().includes(searchLower) ||
@@ -59,15 +60,13 @@ const LawsuitList = () => {
     try {
       if (selectedLawsuitId) {
         await updateLawsuitArchiveStatus(selectedLawsuitId, true); // Archive değerini true yap
-        alert("Dava başarıyla arşive taşındı.");
         closeModal(); // Modalı kapat
       }
     } catch (error) {
-      alert("Dava arşive taşınırken bir hata oluştu.");
-      console.error(error);
+      console.error("Dava arşive taşınırken bir hata oluştu.", error); // Hata log'u
     }
   };
-
+  
   return (
     <div className="flex justify-center bg-[#F0F0F0] min-h-screen py-10">
       <div className="max-w-screen-lg w-full p-6 bg-[#fdf8f0] rounded-lg shadow-lg">
@@ -92,7 +91,7 @@ const LawsuitList = () => {
             <table className="min-w-full border border-[#D5C4A1] bg-[#F8F1E8] rounded-lg shadow-md">
               <thead>
                 <tr className="bg-[#123D3D] text-[#F8F1E8]">
-                  <th className="px-4 py-2">Başvuran Adı</th>
+                  <th className="px-4 py-2">Başvuru Sahibi</th>
                   <th className="px-4 py-2">Avukat</th>
                   <th className="px-4 py-2">Başvuru No</th>
                   <th className="px-4 py-2">Mahkeme</th>
@@ -108,7 +107,7 @@ const LawsuitList = () => {
                     className="hover:bg-[#D5C4A1] text-[#123D3D] transition"
                   >
                     <td className="px-4 py-2 border-b">
-                      {lawsuit.applicantName || "Başvuran Belirtilmemiş"}
+                      {lawsuit.applicantName || lawsuit.organizationName ||  "Başvuran Belirtilmemiş"}
                     </td>
                     <td className="px-4 py-2 border-b">
                       {lawsuit.applicationId?.lawyer?.name || "Avukat Belirtilmemiş"}

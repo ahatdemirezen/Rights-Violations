@@ -34,7 +34,7 @@ const DocumentSubSchema = new Schema(
     },
     documentDescription: {
       type: String,
-      required: true, // Belgenin açıklaması zorunlu
+      required: false, // Belgenin açıklaması zorunlu
     },
     type: {
       type: String,
@@ -45,7 +45,7 @@ const DocumentSubSchema = new Schema(
         "Public Institutions",
         "Other",
       ],
-      required: true,
+      required: false,
     },
   },
   {

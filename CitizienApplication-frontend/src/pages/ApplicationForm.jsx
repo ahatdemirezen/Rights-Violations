@@ -5,6 +5,8 @@ import Vatandas from "../assets/g.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom' // React Router'dan useNavigate import edin
+import { toast, ToastContainer } from "react-toastify"; // Toastify importu
+import "react-toastify/dist/ReactToastify.css"; // Toastify CSS
 
 const CitizenApplicationPage = () => {
 const { createCitizenApplication } = CitizenApplicationStore();
@@ -17,6 +19,7 @@ const [formData, setFormData] = useState({
     nationalID: "",
     applicationType: "individual",
     applicationDate: "",
+    email: "", 
     address: "",
     phoneNumber: "",
     complaintReason: "",
@@ -84,15 +87,42 @@ setFormData((prev) => {
 };
 
 const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
+  e.preventDefault();
+  try {
     console.log("Gönderilen Veri:", formData);
-    await createCitizenApplication(formData);
-    navigate("/tesekkur"); // Başarıyla gönderildikten sonra yönlendirme
-    } catch (error) {
-    console.error("Başvuru oluşturulurken hata oluştu:", error);
+    const response = await createCitizenApplication(formData);
+
+    if (response && response.success) {
+      // Başarılı durum
+      navigate("/tesekkur");
+    } else {
+      // Hata kontrolü
+      toast.error("Başvuru sırasında bir hata oluştu. Lütfen tekrar deneyin.", {
+        position: "top-right", // Sağ üst köşe
+        autoClose: 3000,
+        style: {
+          marginTop: "50px", // Biraz aşağıda görünmesini sağlamak için
+          right: "20px",
+        },
+      });
     }
+  } catch (error) {
+    // Hata durumunda yönlendirme yapılmaz
+    console.error("Başvuru oluşturulurken hata oluştu:", error);
+
+    toast.error("Başvuru oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.", {
+      position: "top-right", // Sağ üst köşe
+      autoClose: 3000,
+      style: {
+        marginTop: "50px", // Biraz aşağıda görünmesini sağlamak için
+        right: "20px",
+      },
+    });
+  }
 };
+
+
+
 const [currentStep, setCurrentStep] = useState(1);
 
 const handleNextStep = () => {
@@ -195,6 +225,34 @@ return (
     <p className="text-red-500 text-sm mt-2">T.C. Kimlik Numarası 11 haneli olmalıdır.</p>
   )}
 </div>
+{/* E-posta Adresi */}
+<div>
+  <label className="block text-[#D5C4A1] font-medium mb-2">
+    E-posta Adresi:
+  </label>
+  <input
+    type="email"
+    name="email"
+    value={formData.email || ""}
+    onChange={handleInputChange}
+    className="w-full p-2 rounded-md text-sm placeholder-gray-400"
+    style={{
+      backgroundColor: "rgba(255, 255, 255, 0.1)", // Hafif saydam arka plan
+      border: "1px solid rgba(213, 196, 161, 0.5)", // Altın kenar çizgisi
+      color: "white", // Yazı rengi
+      backdropFilter: "blur(10px)", // Blur efekti
+    }}
+    placeholder="E-posta adresinizi girin"
+    required
+  />
+  {/* Doğrulama Mesajı */}
+  {!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && formData.email.length > 0 && (
+    <p className="text-red-500 text-sm mt-2">
+      Geçerli bir e-posta adresi girin.
+    </p>
+  )}
+</div>
+
 
 
     {/* Başvuru Türü */}
@@ -344,25 +402,35 @@ return (
       />
     </div>
 
-    {/* Telefon Numarası */}
-    <div>
-      <label className="block text-[#D5C4A1] font-medium mb-2">
-        Telefon Numarası:
-      </label>
-      <input
-        type="text"
-        name="phoneNumber"
-        value={formData.phoneNumber}
-        onChange={handleInputChange}
-        className="w-full p-2 rounded-md text-sm placeholder-gray-400"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.1)", // Hafif saydam beyaz arka plan
-          border: "1px solid rgba(213, 196, 161, 0.5)", // Altın kenar çizgisi
-          color: "white", // Yazı rengi
-          backdropFilter: "blur(10px)", // Blur efekti
-        }}        placeholder="Telefon numaranızı girin"
-      />
-    </div>
+   {/* Telefon Numarası */}
+<div>
+  <label className="block text-[#D5C4A1] font-medium mb-2">
+    Telefon Numarası:
+  </label>
+  <input
+    type="text"
+    name="phoneNumber"
+    value={formData.phoneNumber}
+    onChange={handleInputChange}
+    className="w-full p-2 rounded-md text-sm placeholder-gray-400"
+    style={{
+      backgroundColor: "rgba(255, 255, 255, 0.1)", // Hafif saydam beyaz arka plan
+      border: "1px solid rgba(213, 196, 161, 0.5)", // Altın kenar çizgisi
+      color: "white", // Yazı rengi
+      backdropFilter: "blur(10px)", // Blur efekti
+    }}
+    placeholder="Telefon numaranızı girin"
+    required
+  />
+  {/* Doğrulama Mesajı */}
+  {formData.phoneNumber.length > 0 &&
+    !/^(\+90|0)?\d{10}$/.test(formData.phoneNumber) && (
+      <p className="text-red-500 text-sm mt-2">
+        Geçerli bir telefon numarası giriniz. Örn: 5XXXXXXXXX veya +905XXXXXXXXX
+      </p>
+    )}
+</div>
+
 
     {/* Yakınma Nedeni */}
     <div>
@@ -800,6 +868,15 @@ style={{
   </div>
 )}
     </form>
+    <ToastContainer
+  position="top-right"
+  autoClose={3000}
+  hideProgressBar={false}
+  closeOnClick
+  pauseOnHover
+  draggable
+  style={{ marginTop: "50px" }} // Mesajı biraz aşağı taşı
+/>
   </div>
   </div>
 );

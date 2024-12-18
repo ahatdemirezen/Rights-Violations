@@ -21,5 +21,5 @@ router.put("/:id", upload.array("files"), updateApplication);
 // Başvuru silme
 router.delete("/:id", deleteApplication);
 
-router.get("/api/document-types", getDocumentTypes);
+router.get("/document-types", getDocumentTypes);
 export default router;

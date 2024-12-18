@@ -57,18 +57,18 @@ const refreshToken = createRefreshToken(user._id.toString(), user.name, user.rol
 
     // Access token'ı HTTP-Only cookie olarak ekle
     res.cookie("token", accessToken, {
-      httpOnly: true,
+      httpOnly: true,   // javascript saldırısı önlemek için kullanılmıştır document.Cookie().
       secure: process.env.NODE_ENV === "production",
       maxAge: 2 * 60 * 1000, // 2 dakika
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",   // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
 
     // Refresh token'ı HTTP-Only cookie olarak ekle
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",  // HTTPS üzerinden gönderilmesi için
       maxAge: 24 * 60 * 60 * 1000, // 1 gün
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
 
     // Başarılı giriş mesajı
@@ -109,7 +109,7 @@ export const refreshAccessToken = async (
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 2 * 60 * 1000, // 2 dakika
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",   // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
 
     res.status(200).json({ message: "Access token refreshed successfully" });

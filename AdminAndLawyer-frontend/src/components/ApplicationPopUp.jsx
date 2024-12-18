@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useApplicationStore from "../stores/ApplicationStore";
 import useLawyerListPageStore from "../stores/LawyerListPageStore"; // Avukat listesini getiren store
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // CSS stillerini ekleyin
 
 
 const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) => {
@@ -82,7 +83,7 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Gerekli alanların kontrolü
     const requiredFields = [
       { field: formData.nationalID, label: "T.C. Kimlik Numarası" },
@@ -97,7 +98,6 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
   
     // Boş alan kontrolü
     const emptyFields = requiredFields.filter((item) => !item.field?.trim());
-  
     if (emptyFields.length > 0) {
       const errorMessage = emptyFields.map((item) => item.label).join(", ");
       toast.error(`Lütfen gerekli alanları doldurun: ${errorMessage}`, {
@@ -112,33 +112,61 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
       return; // Kayıt işlemini durdur
     }
   
-    // Orijinal kod devam ediyor
-    const updatedApplication = { ...formData };
+    try {
+      // Backend'e kaydetme işlemi
+      const updatedApplication = { ...formData };
+      
+      // Link ekleme
+      if (formData.documentType === "link" && formData.documentUrl) {
+        updatedApplication.links = [
+          ...(updatedApplication.links || []),
+          {
+            url: formData.documentUrl,
+            description: formData.documentDescription || `Link Açıklaması`,
+          },
+        ];
+      }
   
-    // Link ekleme
-    if (formData.documentType === "link" && formData.documentUrl) {
-      updatedApplication.links = [
-        ...(updatedApplication.links || []),
-        {
-          url: formData.documentUrl,
-          description: formData.documentDescription || `Link Açıklaması`,
-        },
-      ];
+      // Dosya ekleme
+      if (formData.files && formData.files.length > 0) {
+        updatedApplication.files = formData.files.map((file) => ({
+          file: file.file,
+          description: file.description || "No Description",
+          type: file.type || "Other",
+        }));
+      }
+  
+      console.log("Saving application:", updatedApplication);
+  
+      // Backend'e istek gönderme
+      await onSave(updatedApplication);
+  
+      // Başarılı mesajı
+      toast.success("Başvuru başarıyla güncellendi!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+  
+      onClose();
+    } catch (error) {
+      console.error("Hata oluştu:", error);
+      toast.error(`Bir hata oluştu: ${error.message || "Lütfen tekrar deneyin"}`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
     }
-  
-    // Dosya ekleme
-    if (formData.files && formData.files.length > 0) {
-      updatedApplication.files = formData.files.map((file) => ({
-        file: file.file,
-        description: file.description || "No Description",
-        type: file.type || "Other",
-      }));
-    }
-  
-    console.log("Saving application:", updatedApplication);
-    onSave(updatedApplication);
-    onClose();
   };
+  
   
   
 
@@ -479,28 +507,13 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
             </p>
             <p className="text-gray-500 text-sm">
               Tür:{" "}
-              <select
-                value={file.type || ""}
-                onChange={(e) => {
-                  const updatedFiles = [...s3Files];
-                  updatedFiles[index] = {
-                    ...updatedFiles[index],
-                    type: e.target.value,
-                  };
-                  setFormData((prev) => ({
-                    ...prev,
-                    documents: updatedFiles, // documents içine güncellenmiş dosyaları koy
-                  }));
-                }}
-                className="border p-1 rounded text-sm"
-              >
-                <option value="">Tür Seçin</option>
-                <option value="Media Screening">Media Screening</option>
-                <option value="NGO Data">NGO Data</option>
-                <option value="Bar Commissions">Bar Commissions</option>
-                <option value="Public Institutions">Public Institutions</option>
-                <option value="Other">Other</option>
-              </select>
+              <input
+            type="text"
+            value={file.type || "Tür Belirtilmemiş"}
+            readOnly
+            className="w-full p-1 border rounded mt-1 bg-gray-100 text-gray-700 cursor-not-allowed"
+             />
+
             </p>
           </div>
         </div>

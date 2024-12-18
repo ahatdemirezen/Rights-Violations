@@ -17,9 +17,18 @@ export const createLawsuitWithFiles = async (
       message: "Dava ve dosyalar başarıyla oluşturuldu.",
       lawsuit,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Dava oluşturma sırasında hata:", error);
-    next(error);
+
+    // Hata kontrolü: S3 yükleme hatası veya başka bir hata
+    const errorMessage = error?.message || "Dava oluşturulurken bir hata oluştu.";
+
+    res.status(500).json({
+      success: false,
+      message: "Dava oluşturma sırasında hata meydana geldi. Bu isimde bir dosya mevcut olabilir.",
+      error: errorMessage,
+      details: error.details || null, // Detaylı hata açıklamasını döner
+    });
   }
 };
 
@@ -86,16 +95,27 @@ export const updateLawsuitWithFiles = async (
       files
     );
 
-    // Yanıt döndür
+    // Başarılı yanıt döndür
     res.status(200).json({
       message: "Dava başarıyla güncellendi.",
       lawsuit: updatedLawsuit,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Dava güncelleme sırasında hata oluştu:", error);
-    next(error);
+
+    // Hata durumunda uygun response döndür
+    const statusCode = error.status || 500;
+    const errorMessage =
+      error.message || "Dava güncellenirken beklenmeyen bir hata oluştu.";
+
+    res.status(statusCode).json({
+      message: "Dava güncellenemedi.",
+      error: errorMessage,
+      details: error.details || null,
+    });
   }
 };
+
 
 export const updateLawsuitArchiveStatus = async (
   req: Request,

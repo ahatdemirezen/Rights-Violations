@@ -60,12 +60,15 @@ const useLawsuitListPageStore = create((set) => ({
         loading: false,
       }));
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Bir hata oluştu";
       set({
-        error: error.response?.data?.message || "Bir hata oluştu",
+        error: errorMessage,
         loading: false,
       });
+      throw new Error(errorMessage); // Hata fırlat
     }
   },
+  
   createLawsuit: async (applicationId, formData) => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
     try {
@@ -86,14 +89,20 @@ const useLawsuitListPageStore = create((set) => ({
         loading: false,
       }));
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Dava oluşturulurken bir hata oluştu";
+  
+      // Zustand state'ini güncelle
       set({
-        error:
-          error.response?.data?.message ||
-          "Dava oluşturulurken bir hata oluştu",
+        error: errorMessage,
         loading: false,
       });
+  
+      // Hatanın fırlatılması
+      throw new Error(errorMessage);
     }
   },
+  
   updateLawsuitArchiveStatus: async (lawsuitId, archiveStatus) => {
     set({ loading: true, error: null }); // Yüklenme durumunu başlat
     try {

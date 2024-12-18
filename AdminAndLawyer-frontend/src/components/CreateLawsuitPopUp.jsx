@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import useLawsuitListPageStore from "../stores/LawsuitListPageStore";
+import { toast, ToastContainer } from "react-toastify";
 
 const CreateLawsuitModal = ({ application, onClose }) => {
   const { createLawsuit } = useLawsuitListPageStore();
@@ -43,6 +44,7 @@ const CreateLawsuitModal = ({ application, onClose }) => {
     setFileType(updatedTypes);
   };
 
+
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
@@ -54,11 +56,23 @@ const CreateLawsuitModal = ({ application, onClose }) => {
       });
       formData.append("fileDescriptions", JSON.stringify(description));
       formData.append("fileTypes", JSON.stringify(fileType));
-      await createLawsuit(application._id, formData);
-      console.log("Dava başarıyla oluşturuldu!");
-      onClose();
+  
+      await createLawsuit(application._id, formData); // Zustand fonksiyonunu çağır
+  
+      toast.success("Dava başarıyla oluşturuldu!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      onClose(); // Başarı durumunda pop-up kapatılır
     } catch (error) {
       console.error("Dava oluşturma hatası:", error);
+  
+      // Hata mesajını toast ile göster
+      const errorMessage = error?.message || "Dava oluşturulurken bir hata oluştu.";
+      toast.error(`Hata: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 4000,
+      });
     }
   };
 
@@ -104,7 +118,7 @@ const CreateLawsuitModal = ({ application, onClose }) => {
               />
             </div>
             <div>
-              <label className="block text-[#123D3D] font-semibold">Dosya Numarası:</label>
+              <label className="block text-[#123D3D] font-semibold">Mahkeme No:</label>
               <input
                 type="text"
                 name="caseNumber"
@@ -114,7 +128,7 @@ const CreateLawsuitModal = ({ application, onClose }) => {
               />
             </div>
             <div>
-              <label className="block text-[#123D3D] font-semibold">Dosya Numarası:</label>
+              <label className="block text-[#123D3D] font-semibold">Mahkeme Dosya No:</label>
               <input
                 type="text"
                 name="courtFileNo"
@@ -189,6 +203,7 @@ const CreateLawsuitModal = ({ application, onClose }) => {
             Kaydet
           </button>
         </div>
+        <ToastContainer />
       </div>
     </div>
   );

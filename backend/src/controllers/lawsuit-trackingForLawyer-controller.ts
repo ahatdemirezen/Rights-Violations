@@ -144,10 +144,23 @@ export const updateLawsuitWithFiles = async (
     });
   } catch (error) {
     console.error("Dava güncelleme sırasında hata oluştu:", error);
+  
     await session.abortTransaction();
     session.endSession();
-    next(error);
-  }
+  
+    // error türünü kontrol et
+    if (error instanceof Error) {
+      return res.status(500).json({
+        message: "Dava güncellenirken bir hata oluştu.",
+        error: error.message,
+      });
+    }
+    // Eğer error, Error tipinde değilse
+    return res.status(500).json({
+      message: "Dava güncellenirken bilinmeyen bir hata oluştu.",
+      error: String(error),
+    });
+  }  
 };
 
 

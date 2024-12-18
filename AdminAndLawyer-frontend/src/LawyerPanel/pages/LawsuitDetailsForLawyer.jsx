@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useLawsuitListPageStore from "../../stores/LawsuitListForLawyerStore";
 import { FaFolder, FaFileAlt } from "react-icons/fa"; // Simge için ikonlar
+import { toast, ToastContainer } from "react-toastify";
 
 const LawsuitDetails = () => {
   const { lawsuitId } = useParams(); // URL'den davanın ID'sini al
@@ -71,6 +72,7 @@ const LawsuitDetails = () => {
     updatedFileTypes[index] = value; // Belirtilen indeksi güncelle
     setNewFileTypes(updatedFileTypes); // State'i güncelle
   };
+
   const handleSave = async () => {
     const formDataObj = new FormData();
   
@@ -87,21 +89,40 @@ const LawsuitDetails = () => {
       formDataObj.append("description", newDescriptions[index] || ""); // Açıklamayı ekle
       formDataObj.append("fileType", newFileTypes[index] || ""); // Dosya tipini ekle
     });
-    
   
     console.log("FormData içeriği:", [...formDataObj.entries()]); // FormData içeriğini kontrol et
   
     try {
       await updateLawsuit(lawsuitId, formDataObj); // Zustand store'daki updateLawsuit fonksiyonunu çağır
       await fetchLawsuitById(lawsuitId); // Güncellenmiş verileri yeniden getir
+  
+      toast.success("Dava başarıyla güncellendi!", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+  
       setIsEditing(false);
       setNewFiles([]);
       setNewDescriptions([]);
       setNewFileTypes([]);
     } catch (err) {
       console.error("Güncelleme sırasında hata:", err.response?.data || err.message);
+  
+      // Hata mesajını kullanıcıya toast ile göster
+      const errorMessage =
+        err.response?.data?.error || // Backend "error" mesajı
+        err.response?.data?.message || // Backend "message" alanı
+        "Dava güncellenirken bir hata oluştu. Bu isimde bir dosya mevcut olabilir."; // Varsayılan hata mesajı
+  
+      toast.error(`Hata: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "colored",
+      });
     }
   };
+  
   
 
   const filteredFiles =
@@ -110,7 +131,6 @@ const LawsuitDetails = () => {
     : selectedLawsuit?.files;
 
   if (loading) return <p>Yükleniyor...</p>;
-  if (error) return <p>Hata: {error}</p>;
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-[#E8EAE6] text-black shadow-lg rounded-lg">
@@ -403,6 +423,7 @@ const LawsuitDetails = () => {
       ) : (
         <p>Dava bilgisi bulunamadı.</p>
       )}
+        <ToastContainer />
     </div>
     
   );

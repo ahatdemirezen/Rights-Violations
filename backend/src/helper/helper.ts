@@ -13,7 +13,6 @@ export const saveDocument = async (
   }
 ): Promise<Types.ObjectId> => {
   const { description, type, url, source } = documentData;
-  console.log("saveDocument çağrıldı:", documentType, documentData);
 
   const documentObject = {
     documentType,

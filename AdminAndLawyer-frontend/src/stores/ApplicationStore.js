@@ -1,5 +1,7 @@
 import { useState } from "react";
 import axiosInstance from "../stores/axiosInstance";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -49,9 +51,9 @@ const useApplicationStore = () => {
       for (let pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
-  
-      const response = await axiosInstance.post("/applications", formData, {
+      const response = await axiosInstance.post(`${apiUrl}/applications`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true, // Kimlik doğrulama bilgilerini ekler
       });
   
       // Başarılı işlem sonucunu döndür
@@ -76,9 +78,11 @@ const useApplicationStore = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get("/applications/applications");
+      const response = await axiosInstance.get(`${apiUrl}/applications/applications`, {
+        withCredentials: true, // Kimlik doğrulama bilgilerini ekler
+      });
       setApplications(response.data);
-    } catch (err) {
+    }catch (err) {
       handleError(err, "Veriler alınırken bir hata oluştu!");
     } finally {
       setLoading(false);
@@ -90,7 +94,9 @@ const useApplicationStore = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get("/applications/api/document-types");
+      const response = await axiosInstance.get(`${apiUrl}/applications/document-types` ,{
+        withCredentials: true,
+      } );
       setDocumentTypes(response.data.documentTypes || []);
     } catch (err) {
       handleError(err, "Dosya türleri alınırken bir hata oluştu!");
@@ -103,7 +109,9 @@ const useApplicationStore = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get(`/applications/${id}`);
+      const response = await axiosInstance.get(`${apiUrl}/applications/${id}`, {
+        withCredentials: true,
+      });
       setS3Files(response.data.s3Files || []);
       return response.data;
     } catch (err) {
@@ -117,13 +125,14 @@ const useApplicationStore = () => {
   const updateApplication = async (id, updatedData) => {
     setLoading(true);
     setError(null);
+  
     try {
       const formData = new FormData();
   
       // Text alanlarını ekleme
       Object.entries(updatedData).forEach(([key, value]) => {
         if (
-          !["files", "links", "lawyer" , "eventCategories" ].includes(key) &&
+          !["files", "links", "lawyer", "eventCategories"].includes(key) &&
           value !== undefined &&
           value !== null
         ) {
@@ -131,21 +140,24 @@ const useApplicationStore = () => {
         }
       });
   
-        // EventCategories alanını string olarak ekleme
-    if (updatedData.eventCategories) {
-      const eventCategory =
-        Array.isArray(updatedData.eventCategories) &&
-        updatedData.eventCategories.length > 0
-          ? updatedData.eventCategories[0] // Array ise ilk elemanı al
-          : updatedData.eventCategories; // Değilse doğrudan ekle
-      formData.append("eventCategories", eventCategory);
-    }
-
+      // EventCategories alanını string olarak ekleme
+      if (updatedData.eventCategories) {
+        const eventCategory =
+          Array.isArray(updatedData.eventCategories) &&
+          updatedData.eventCategories.length > 0
+            ? updatedData.eventCategories[0] // Array ise ilk elemanı al
+            : updatedData.eventCategories; // Değilse doğrudan ekle
+        formData.append("eventCategories", eventCategory);
+      }
+  
       // Dosyaları ekleme
       if (Array.isArray(updatedData.files) && updatedData.files.length > 0) {
         updatedData.files.forEach((file, index) => {
           formData.append("files", file.file || file); // Dosya nesnesi
-          formData.append(`descriptions[files][${index}]`, file.description || `File ${index + 1}`); // Dosya açıklaması
+          formData.append(
+            `descriptions[files][${index}]`,
+            file.description || `File ${index + 1}`
+          ); // Dosya açıklaması
           formData.append(`types[files][${index}]`, file.type || "Other"); // Dosya türü
         });
       }
@@ -154,7 +166,10 @@ const useApplicationStore = () => {
       if (Array.isArray(updatedData.links) && updatedData.links.length > 0) {
         updatedData.links.forEach((link, index) => {
           formData.append(`links[${index}]`, link.url || ""); // Link URL'si
-          formData.append(`descriptions[links][${index}]`, link.description || `Link ${index + 1}`); // Link açıklaması
+          formData.append(
+            `descriptions[links][${index}]`,
+            link.description || `Link ${index + 1}`
+          ); // Link açıklaması
           formData.append(`types[links][${index}]`, link.type || "Other"); // Link türü
         });
       }
@@ -164,14 +179,10 @@ const useApplicationStore = () => {
         formData.append("lawyer", updatedData.lawyer); // Lawyer ID'sini FormData'ya ekle
       }
   
-      // FormData'yı logla
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-  
       // PUT isteği gönder
-      const response = await axiosInstance.put(`/applications/${id}`, formData, {
+      const response = await axiosInstance.put(`${apiUrl}/applications/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true, // Kimlik doğrulama bilgilerini ekler
       });
   
       // Başvuru listesini güncelle
@@ -183,11 +194,28 @@ const useApplicationStore = () => {
   
       console.log("Başvuru başarıyla güncellendi:", response.data);
     } catch (err) {
-      handleError(err, "Başvuru güncellenirken bir hata oluştu!");
+      // Backend'den gelen hatayı kontrol et
+      const errorMessage =
+        err.response?.data?.error || "Başvuru güncellenirken bir hata oluştu!";
+      
+      // Toastify ile kullanıcıya hata mesajını göster
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 10000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+  
+      // Store'un hata state'ini güncelle
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+  
   
   
 

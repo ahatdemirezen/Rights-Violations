@@ -47,13 +47,18 @@ const useLawsuitListForLawyerStore = create((set) => ({
   },
   // Davayı güncelleme fonksiyonu
   updateLawsuit: async (lawsuitId, formData) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null }); // Yüklenme durumu başlat
     try {
-      const response = await axiosInstance.put(`${apiUrl}/lawyer-lawsuits/${lawsuitId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.put(
+        `${apiUrl}/lawyer-lawsuits/${lawsuitId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
       const updatedLawsuit = response.data.lawsuit;
   
       set((state) => ({
@@ -64,12 +69,19 @@ const useLawsuitListForLawyerStore = create((set) => ({
         loading: false,
       }));
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Bir hata oluştu";
+      
+      // Hata state'ini güncelle
       set({
-        error: error.response?.data?.message || "Bir hata oluştu",
+        error: errorMessage,
         loading: false,
       });
+      
+      // Hata fırlat (çağıran fonksiyon tarafından işlenebilir)
+      throw new Error(errorMessage);
     }
   },
+  
   // Takvim etkinliklerini getir
   fetchCalendarEvents: async () => {
     set({ loading: true, error: null });

@@ -111,19 +111,16 @@ export const getDocumentTypes = async (req: Request, res: Response): Promise<voi
 
 export const updateApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;
-
   try {
-    const { updatedApplication, message } = await updateApplicationService(req, id); // Service çağrısı
-
+    const { updatedApplication, message } = await updateApplicationService(req, id);
     res.status(200).json({
       message,
       application: updatedApplication,
     });
   } catch (error: any) {
     console.error("Başvuru güncellenirken hata oluştu:", error.message);
-    res.status(500).json({
-      error: "Başvuru güncellenirken hata oluştu.",
-      details: error.message,
+    res.status(error.message.includes("Dosya zaten mevcut") ? 400 : 500).json({
+      error: error.message || "Başvuru güncellenirken bir hata oluştu.",
     });
   }
 };

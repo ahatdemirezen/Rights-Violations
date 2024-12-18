@@ -50,17 +50,20 @@ const CitizenApplicationStore = () => {
         console.log(pair[0], pair[1]);
       }
   
-      await axios.post(`${apiUrl}/citizen/create`, formData, {
+      const response = await axios.post(`${apiUrl}/citizen/create`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   
+      console.log("Başarılı Yanıt:", response);
+      return response.data; // API yanıtını geri döndür
+  
     } catch (err) {
       console.error("Başvuru oluşturulamadı:", err);
+      throw err; // Hata durumunda hatayı geri fırlat
     } finally {
       setLoading(false);
     }
   };
-
 
   return {
     applications,

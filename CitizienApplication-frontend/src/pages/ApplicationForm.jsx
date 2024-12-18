@@ -90,6 +90,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   try {
     console.log("Gönderilen Veri:", formData);
+
     const response = await createCitizenApplication(formData);
 
     if (response && response.success) {
@@ -97,37 +98,87 @@ const handleSubmit = async (e) => {
       navigate("/tesekkur");
     } else {
       // Hata kontrolü
-      toast.error("Başvuru sırasında bir hata oluştu. Lütfen tekrar deneyin.", {
-        position: "top-right", // Sağ üst köşe
-        autoClose: 3000,
-        style: {
-          marginTop: "50px", // Biraz aşağıda görünmesini sağlamak için
-          right: "20px",
-        },
-      });
+      const errorMessage =
+        response?.error || "Başvuru sırasında bir hata oluştu. Lütfen tekrar deneyin.";
+
+      // Backend'den gelen nationalID hatasını özel olarak göster
+      if (errorMessage.includes("T.C. Kimlik Numarası")) {
+        toast.error("Bu T.C. Kimlik Numarası ile zaten bir başvuru yapılmış.", {
+          position: "top-right",
+          autoClose: 3000,
+          style: { marginTop: "50px", right: "20px" },
+        });
+      } else {
+        // Genel hata mesajı
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
+          style: { marginTop: "50px", right: "20px" },
+        });
+      }
     }
   } catch (error) {
-    // Hata durumunda yönlendirme yapılmaz
     console.error("Başvuru oluşturulurken hata oluştu:", error);
 
-    toast.error("Başvuru oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.", {
-      position: "top-right", // Sağ üst köşe
-      autoClose: 3000,
-      style: {
-        marginTop: "50px", // Biraz aşağıda görünmesini sağlamak için
-        right: "20px",
-      },
-    });
+    // Backend'den gelen spesifik hata mesajını al ve kontrol et
+    const errorMessage =
+      error.response?.data?.error || "Başvuru oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.";
+
+    // National ID hatasını kontrol et
+    if (errorMessage.includes("T.C. Kimlik Numarası")) {
+      toast.error("Bu T.C. Kimlik Numarası ile zaten bir başvuru yapılmış.", {
+        position: "top-right",
+        autoClose: 3000,
+        style: { marginTop: "50px", right: "20px" },
+      });
+    } else {
+      // Genel hata mesajı
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        style: { marginTop: "50px", right: "20px" },
+      });
+    }
   }
 };
-
-
 
 const [currentStep, setCurrentStep] = useState(1);
 
 const handleNextStep = () => {
-  setCurrentStep((prev) => prev + 1);
+  // Step 1 doğrulama
+  if (currentStep === 1) {
+    if (
+      !formData.nationalID ||
+      !/^\d{11}$/.test(formData.nationalID) ||
+      !formData.email ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ||
+      (formData.applicationType === "individual" && !formData.applicantName) ||
+      (formData.applicationType === "organization" && !formData.organizationName)
+    ) {
+      toast.error("Lütfen tüm zorunlu alanları doğru şekilde doldurun.", {
+        position: "top-right",
+        autoClose: 3000,
+        style: { marginTop: "50px", right: "20px" },
+      });
+      return; // Doğrulama başarısızsa ilerlemeyi engelle
+    }
+  }
+
+  // Step 2 doğrulama
+  if (currentStep === 2) {
+    if (!formData.applicationDate || !formData.address || !formData.phoneNumber || !formData.eventCategories) {
+      toast.error("Lütfen tüm zorunlu alanları doldurun.", {
+        position: "top-right",
+        autoClose: 3000,
+        style: { marginTop: "50px", right: "20px" },
+      });
+      return; // Doğrulama başarısızsa ilerlemeyi engelle
+    }
+  }
+
+  setCurrentStep((prev) => prev + 1); // Doğrulama başarılıysa sonraki adıma geç
 };
+
 
 const handlePreviousStep = () => {
   setCurrentStep((prev) => prev - 1);
@@ -457,46 +508,50 @@ return (
       ></textarea>
     </div>
 
-    {/* Olay Kategorileri */}
-    <div className="col-span-2">
-      <label className="block text-[#D5C4A1] font-medium mb-2">
-        Olay Kategorileri:
-      </label>
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setIsDropdownOpen((prev) => !prev)}
-          className="w-full p-2 rounded-md text-sm placeholder-gray-400"
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)", // Hafif saydam beyaz arka plan
-            border: "1px solid rgba(213, 196, 161, 0.5)", // Altın kenar çizgisi
-            color: "white", // Yazı rengi
-            backdropFilter: "blur(10px)", // Blur efekti
-          }}        >
-          {formData.eventCategories || "Kategori Seçin"}
-        </button>
-        {isDropdownOpen && (
-          <div className="absolute z-10 w-full border border-[#F8F1E8] bg-[#F8F1E8] shadow-md mt-1 rounded-md"
-          style={{
-            maxHeight: "200px", // Maksimum yükseklik
-            overflowY: "auto", // Scroll ekleme
-            scrollbarWidth: "none", // Tarayıcıda scrollbar'ı gizler
-
-          }}
-        >
-            {eventCategoriesOptions.map((category, index) => (
-              <div
-                key={index}
-                onClick={() => handleCategorySelect(category)}
-                className="px-4 py-2 text-sm text-[#123D3D] hover:bg-[#D5C4A1] cursor-pointer rounded-md"
-              >
-                {category}
-              </div>
-            ))}
+  {/* Olay Kategorileri */}
+<div className="col-span-2">
+  <label className="block text-[#D5C4A1] font-medium mb-2">
+    Olay Kategorileri:
+  </label>
+  <div className="relative">
+    <button
+      type="button"
+      onClick={() => setIsDropdownOpen((prev) => !prev)}
+      className={`w-full p-2 rounded-md text-sm placeholder-gray-400 ${
+        !formData.eventCategories ? "border-red-500" : "border-[#D5C4A1]"
+      }`}
+      style={{
+        backgroundColor: "rgba(255, 255, 255, 0.1)", // Hafif saydam beyaz arka plan
+        border: "1px solid rgba(213, 196, 161, 0.5)", // Altın kenar çizgisi
+        color: "white", // Yazı rengi
+        backdropFilter: "blur(10px)", // Blur efekti
+      }}
+    >
+      {formData.eventCategories || "Kategori Seçin"}
+    </button>
+    {isDropdownOpen && (
+      <div
+        className="absolute z-10 w-full border border-[#F8F1E8] bg-[#F8F1E8] shadow-md mt-1 rounded-md"
+        style={{
+          maxHeight: "200px", // Maksimum yükseklik
+          overflowY: "auto", // Scroll ekleme
+          scrollbarWidth: "none", // Tarayıcıda scrollbar'ı gizler
+        }}
+      >
+        {eventCategoriesOptions.map((category, index) => (
+          <div
+            key={index}
+            onClick={() => handleCategorySelect(category)}
+            className="px-4 py-2 text-sm text-[#123D3D] hover:bg-[#D5C4A1] cursor-pointer rounded-md"
+          >
+            {category}
           </div>
-        )}
+        ))}
       </div>
-    </div>
+    )}
+  </div>
+</div>
+
 
     {/* Geri ve Devam Et Butonları */}
     <div className="col-span-2 flex justify-between mt-4">

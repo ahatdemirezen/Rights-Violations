@@ -16,23 +16,35 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
       message: "Başvuru başarıyla oluşturuldu.",
       application: result,
     });
-  }  catch (error) {
+  } catch (error) {
     console.error("Başvuru oluşturulurken hata:", error);
 
     // Hata tipini kontrol et
     if (error instanceof Error) {
       // TC Kimlik Numarası için özel hata kontrolü
       if (error.message === "Bu TC Kimlik Numarası ile zaten bir başvuru yapılmıştır.") {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ success: false, error: error.message });
         return;
       }
-      res.status(500).json({ error: "Başvuru oluşturulurken bir hata oluştu." });
+
+      // Dosya yüklenememe hatası için özel kontrol
+      if (error.message.includes("Dosya yüklenemedi")) {
+        res.status(500).json({
+          success: false,
+          error: "Dosya yüklenemedi. Bu isimde bir dosya mevcut olabilir.",
+        });
+        return;
+      }
+
+      // Genel hata kontrolü
+      res.status(500).json({ success: false, error: "Başvuru oluşturulurken bir hata oluştu." });
     } else {
       // Error nesnesi değilse genel hata mesajı
-      res.status(500).json({ error: "Bilinmeyen bir hata oluştu." });
+      res.status(500).json({ success: false, error: "Bilinmeyen bir hata oluştu." });
     }
   }
 };
+
 
 
 export const getAllApplications = async (req: Request, res: Response): Promise<void> => {

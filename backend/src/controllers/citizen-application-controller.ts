@@ -15,7 +15,6 @@ const saveDocument = async (
   }
 ): Promise<Types.ObjectId> => {
   const { description, type, url, source } = documentData;
-  console.log("saveDocument çağrıldı:", documentType, documentData);
 
   const documentObject = {
     documentType,
@@ -52,10 +51,14 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
       types = [],
     } = req.body;
 
-    // Zorunlu Alan Kontrolü
-    if ( !nationalID || !applicationType || !applicationDate || !eventCategories) {
-      res.status(400).json({ error: "Zorunlu alanlar eksik!" });
-      return; // Fonksiyondan çık
+    // National ID Kontrolü
+    const existingApplication = await ApplicationModel.findOne({ nationalID });
+    if (existingApplication) {
+      res.status(400).json({
+        success: false,
+        error: "Bu T.C. Kimlik Numarası ile zaten bir başvuru yapılmış.",
+      });
+      return;
     }
 
     // eventCategories doğrulama
@@ -71,7 +74,7 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
       "Düşünce ve İfade Özgürlüğü",
     ];
     if (!validCategories.includes(eventCategories)) {
-      res.status(400).json({ error: "Geçersiz eventCategories değeri!" });
+      res.status(400).json({ success: false, error: "Geçersiz eventCategories değeri!" });
       return;
     }
 
@@ -85,7 +88,7 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
       for (let i = 0; i < uploadedFiles.length; i++) {
         const file = uploadedFiles[i] as Express.Multer.File;
         const description = Array.isArray(descriptions) ? descriptions[i] : descriptions || `Document ${i + 1}`;
-        const type = Array.isArray(types) ? types[i] : "Other";
+        const type = Array.isArray(types) ? types[i] : types || "Other";
 
         try {
           const s3Response = await uploadToS3(file);
@@ -100,7 +103,8 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
           documents.push(documentId);
         } catch (error) {
           console.error("Dosya yüklenirken hata:", error);
-          res.status(500).json({ error: "Dosya yüklenemedi." });
+          res.status(500).json({ success: false, error: "Dosya yüklenemedi. Bu isimde bir dosya mevcut" });
+          return;
         }
       }
     }
@@ -112,7 +116,7 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
         const { documentDescription, type, documentSource } = link;
 
         if (!documentSource) {
-          res.status(400).json({ error: "Her link için 'documentSource' zorunludur." });
+          res.status(400).json({ success: false, error: "Her link için 'documentSource' zorunludur." });
           return;
         }
 
@@ -137,22 +141,23 @@ export const createApplicationcitizen = async (req: Request, res: Response): Pro
       address,
       phoneNumber,
       complaintReason,
-      eventCategories, // eventCategories kaydediliyor
+      eventCategories,
       documents,
     });
 
     const savedApplication = await newApplication.save();
     const populatedApplication = await ApplicationModel.findById(savedApplication._id).populate("documents");
 
+    // Başarılı yanıt
     res.status(201).json({
+      success: true,
       message: "Başvuru başarıyla oluşturuldu.",
       application: populatedApplication,
     });
   } catch (error) {
     console.error("Başvuru oluşturulurken hata:", error);
-    res.status(500).json({ error: "Başvuru oluşturulurken hata oluştu." });
+    res.status(500).json({ success: false, error: "Başvuru oluşturulurken hata oluştu." });
   }
 };
-
 
 export default createApplicationcitizen;

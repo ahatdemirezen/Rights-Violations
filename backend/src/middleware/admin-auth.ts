@@ -29,8 +29,6 @@ export const authenticateAdmin = (
     // Token doğrulama
     const verifiedToken = jwt.verify(cookieToken, jwtSecret || "") as JwtPayload;
 
-    console.log("Verified Token Content:", verifiedToken);
-
     // Token içerisinden roles bilgilerini al ve req.user'a ekle
     req.user = {
       roles: verifiedToken.roles as string[], // Roles array olarak ekleniyor

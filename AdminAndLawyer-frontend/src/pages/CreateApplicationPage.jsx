@@ -119,8 +119,6 @@ console.log("errorMessage")
 
   res.status(500).json({ error: errorMessage });
 }
-
-  
 };
 
 

@@ -159,7 +159,7 @@ const ApplicationListPage = () => {
                 <th className="px-4 py-2">Başvuru No</th>
                 <th className="px-4 py-2">Tarih</th>
                 <th className="px-4 py-2">Durum</th>
-                <th className="px-4 py-2">Dava Durumu</th> {/* Yeni başlık */}
+                <th className="px-4 py-2">Dava Durumu</th>
                 <th className="px-4 py-2">İşlemler</th>
               </tr>
             </thead>
@@ -178,11 +178,9 @@ const ApplicationListPage = () => {
         {new Date(app.applicationDate).toLocaleDateString()}
       </td>
       <td className="px-4 py-2 border-b">{app.status}</td>
-      {/* Dava Durumu Sütunu */}
       <td className="px-4 py-2 border-b text-center">
         {app.lawsuitCreated ? "Oluşmuştur" : ""}
       </td>
-      {/* İşlemler Sütunu */}
       <td className="px-4 py-2 border-b">
         <div className="flex justify-center space-x-2">
           <button

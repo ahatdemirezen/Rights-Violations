@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { UserModel ,UserRole } from "../models/user-model";
 import { Request } from "express";
 
+
 export const createApplicationService = async (applicationData: any, files: any): Promise<any> => {
   const {
     applicantName,
@@ -27,7 +28,7 @@ export const createApplicationService = async (applicationData: any, files: any)
   const existingApplication = await ApplicationModel.findOne({ nationalID });
   if (existingApplication) {
     throw new Error("Bu TC Kimlik Numarası ile zaten bir başvuru yapılmıştır.");
-  }  
+  }
 
   // Event categories doğrulama
   const validCategories = [
@@ -58,14 +59,11 @@ export const createApplicationService = async (applicationData: any, files: any)
       const type = Array.isArray(types) ? types[i] : types || "Other";
 
       try {
-        const s3Response = await uploadToS3(file);
-        const documentUrl = s3Response.files?.[0]?.url;
-        if (!documentUrl) throw new Error("S3 URL alınamadı.");
-
+        const { signedUrl } = await uploadToS3(file); // Signed URL alınıyor
         const documentId = await saveDocument("files", {
           description,
           type,
-          url: documentUrl,
+          url: signedUrl,
         });
         documents.push(documentId);
       } catch (error) {
@@ -117,6 +115,7 @@ export const createApplicationService = async (applicationData: any, files: any)
   return populatedApplication;
 };
 
+
 export const getAllApplicationsService = async (documentType?: string) => {
     try {
       // Belge türüne göre filtreleme
@@ -164,8 +163,7 @@ export const getAllApplicationsService = async (documentType?: string) => {
       throw new Error("Başvuru bilgileri alınırken bir hata oluştu.");
     }
   };
-   
-
+  
   export const updateApplicationService = async (req: Request, id: string) => {
     const updatedFields = { ...req.body };
   
@@ -177,17 +175,28 @@ export const getAllApplicationsService = async (documentType?: string) => {
   
     let existingDocuments = existingApplication.documents as any[];
   
-    // Dosyaları işleyin ve yeni belgeleri ekleyin
+    // Yeni dosyaları işleyip belgeleri ekleyin
     if (req.files && Array.isArray(req.files)) {
-      const newDocumentIds = await processDocuments(
-        req.body.descriptions || [],
-        req.body.types || [],
-        req.files as Express.Multer.File[],
-        req.body.links || []
-      );
+      try {
+        const newDocumentIds = await processDocuments(
+          {
+            files: req.body.descriptions?.files || [],
+            links: req.body.descriptions?.links || [],
+          },
+          {
+            files: req.body.types?.files || [],
+            links: req.body.types?.links || [],
+          },
+          req.files as Express.Multer.File[],
+          req.body.links || []
+        );
   
-      // Mevcut ve yeni belgeleri birleştir
-      existingDocuments = [...existingDocuments, ...newDocumentIds];
+        // Mevcut ve yeni belgeleri birleştir
+        existingDocuments = [...existingDocuments, ...newDocumentIds];
+      } catch (error) {
+        console.error("Dosyalar işlenirken hata:", error);
+        throw new Error("Dosyalar yüklenemedi.");
+      }
     }
   
     // Güncellenmiş belgeleri ekleyin
@@ -227,3 +236,4 @@ export const getAllApplicationsService = async (documentType?: string) => {
       message: "Başvuru başarıyla güncellendi.",
     };
   };
+  

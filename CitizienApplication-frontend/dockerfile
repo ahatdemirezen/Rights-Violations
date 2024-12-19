@@ -1,0 +1,21 @@
+# 1. Node.js'nin uygun sürümünü kullan
+FROM node:20.17.0
+
+# 2. Uygulama için çalışma dizini oluştur
+WORKDIR /app
+
+# 3. package.json ve package-lock.json dosyalarını kopyala
+COPY package*.json ./
+
+# 4. Bağımlılıkları yükle
+RUN npm install
+
+# 5. TypeScript'i derle
+COPY . . 
+RUN npm run build # TypeScript build komutunu çalıştırır
+
+# 6. Portu aç
+EXPOSE 4007
+
+# 7. Uygulamayı başlat
+CMD ["npm", "run", "start"]

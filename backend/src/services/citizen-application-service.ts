@@ -54,16 +54,19 @@ export const createApplicationCitizenService = async (data: any, files?: Express
       const description = Array.isArray(descriptions) ? descriptions[i] : descriptions || `Document ${i + 1}`;
       const type = Array.isArray(types) ? types[i] : types || "Other";
 
-      const s3Response = await uploadToS3(file);
-      const documentUrl = s3Response.files?.[0]?.url;
-      if (!documentUrl) throw new Error("S3 URL alınamadı.");
 
-      const documentId = await saveDocument("files", {
-        description,
-        type,
-        url: documentUrl,
-      });
-      documents.push(documentId);
+       try {
+        const { signedUrl } = await uploadToS3(file); // Signed URL alınıyor
+        const documentId = await saveDocument("files", {
+          description,
+          type,
+          url: signedUrl,
+        });
+        documents.push(documentId);
+      } catch (error) {
+        console.error("Dosya yüklenirken hata:", error);
+        throw new Error("Dosya yüklenemedi.");
+      }
     }
   }
 

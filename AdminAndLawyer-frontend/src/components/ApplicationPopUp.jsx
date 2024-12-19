@@ -167,9 +167,6 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
     }
   };
   
-  
-  
-
 
 const { fetchDocumentTypes } = useApplicationStore();
 
@@ -238,15 +235,14 @@ useEffect(() => {
           className="w-full p-2 border border-gray-300 rounded max-w-sm"
             >
               <option value="">Kategori Seçin</option>
-              {eventCategoriesOptions.map((category, index) => (
-                <option key={index} value={category}>
-                  {category}
-                </option>
-              ))}
+              {eventCategoriesOptions.map((category) => (
+              <option key={category} value={category}>
+              {category}
+             </option>
+             ))}
+
             </select>
           </div>
-
-
           {/* Başvuruyu Alan Kişi */}
           {application && (
             <div>
@@ -365,10 +361,13 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
   >
     <option value="">Avukat Seçin</option>
     {lawyers?.map((lawyer) => (
-      <option key={lawyer._id} value={lawyer?.id}>
-        {lawyer.name}
-      </option>
-    ))}
+   <option key={lawyer._id || lawyer.id} value={lawyer.id}>
+     {lawyer.name}
+   </option>
+   ))}
+
+
+
   </select>
 </div>
 
@@ -383,8 +382,8 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
     <div className="grid grid-cols-3 gap-4">
     {formData.files.map((file, index) => (
   <div
-    key={index}
-    className="p-4 border rounded-lg bg-gray-50 shadow-md flex flex-col space-y-2 relative max-h-40 overflow-y-auto"
+  key={`${file.file?.name || 'file'}-${index}`}
+  className="p-4 border rounded-lg bg-gray-50 shadow-md flex flex-col space-y-2 relative max-h-40 overflow-y-auto"
   >
     {/* Dosya Önizleme */}
     {file.file && (
@@ -496,8 +495,8 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
   {Array.isArray(s3Files) && s3Files.length > 0 ? (
     s3Files.map((file, index) => (
       <div
-        key={index}
-        className="my-2 p-4 border rounded bg-[#FFFBF0] flex flex-col shadow-sm"
+      key={`${file.documentUrl || 's3file'}-${index}`}
+      className="my-2 p-4 border rounded bg-[#FFFBF0] flex flex-col shadow-sm"
       >
         {/* Açıklama ve Tür Alanı */}
         <div className="flex justify-between">
@@ -546,9 +545,6 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
     <p className="text-gray-500">Mevcut dosya veya link bulunamadı.</p>
   )}
 </div>
-
-
-
 
 
 <div>

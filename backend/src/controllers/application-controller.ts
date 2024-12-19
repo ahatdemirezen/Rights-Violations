@@ -1,7 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { ApplicationModel } from "../models/application-model";
-import { DocumentModel } from "../models/document-model";
-import { deleteFileFromS3 } from "../controllers/S3-controller";
 import { createApplicationService , getAllApplicationsService , getApplicationByIdService , updateApplicationService} from "../services/application-service"; // Service katmanı import ediliyor
 
 
@@ -122,41 +119,6 @@ export const updateApplication = async (req: Request, res: Response, next: NextF
     res.status(error.message.includes("Dosya zaten mevcut") ? 400 : 500).json({
       error: error.message || "Başvuru güncellenirken bir hata oluştu.",
     });
-  }
-};
-
-
-export const deleteApplication = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  try {
-    const application = await ApplicationModel.findById(id).populate("documents");
-
-    if (!application) {
-      res.status(404).json({ error: "Başvuru bulunamadı." });
-      return;
-    }
-
-    for (const documentId of application.documents) {
-      const document = await DocumentModel.findById(documentId);
-
-      if (document) {
-        for (const doc of document.documents) {
-          if (doc.documentUrl) {
-            await deleteFileFromS3(doc.documentUrl);
-          }
-        }
-
-        await DocumentModel.findByIdAndDelete(documentId);
-      }
-    }
-
-    await ApplicationModel.findByIdAndDelete(id);
-
-    res.status(200).json({ message: "Başvuru ve ilgili dokümanlar başarıyla silindi." });
-  } catch (error: any) {
-    console.error("Hata:", error.message);
-    res.status(500).json({ error: "Başvuru silinirken hata oluştu.", details: error.message });
   }
 };
 

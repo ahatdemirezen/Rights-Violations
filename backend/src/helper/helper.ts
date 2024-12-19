@@ -2,7 +2,6 @@ import { DocumentModel } from "../models/document-model";
 import { Types } from "mongoose";
 import { uploadToS3 } from "../controllers/S3-controller";
 
-// Yardımcı Fonksiyon: DocumentModel Kaydet
 export const saveDocument = async (
   documentType: "files" | "link",
   documentData: {
@@ -30,6 +29,8 @@ export const saveDocument = async (
   return savedDocument._id as Types.ObjectId;
 };
 
+
+
 export const processDocuments = async (
   descriptions: { files: string[]; links: string[] },
   types: { files: string[]; links: string[] },
@@ -38,35 +39,40 @@ export const processDocuments = async (
 ): Promise<Types.ObjectId[]> => {
   const savedDocuments: Types.ObjectId[] = [];
 
-  // Dosyaları İşle
+  // Dosyaları işle
   for (let i = 0; i < files.length; i++) {
     const description = descriptions.files[i] || `Document ${i + 1}`;
     const type = types.files[i] || "Other";
-    const s3Response = await uploadToS3(files[i]);
-    const documentUrl = s3Response.files[0]?.url;
+
+    const s3Response = await uploadToS3(files[i]); // AWS S3'e yükle
+    const documentUrl = s3Response.signedUrl;
 
     const newDocument = new DocumentModel({
-      documents: [{ documentDescription: description, type, documentUrl }],
+      documents: [
+        {
+          documentType: "files", // Dosya türünü otomatik olarak 'files' yap
+          documentUrl,
+          documentDescription: description,
+          type,
+        },
+      ],
     });
 
     const savedDocument = await newDocument.save();
     savedDocuments.push(savedDocument._id as Types.ObjectId);
   }
 
-  // Linkleri İşle
+  // Linkleri işle
   for (let i = 0; i < links.length; i++) {
     const description = descriptions.links[i] || `Link ${i + 1}`;
     const type = types.links[i] || "Other";
-
-    const documentUrl = links[i];
-    if (!documentUrl) continue; // Boş link varsa atla
+    const documentSource = links[i];
 
     const newDocument = new DocumentModel({
       documents: [
         {
           documentType: "link",
-          documentSource: documentUrl,
-          documentUrl,
+          documentSource,
           documentDescription: description,
           type,
         },

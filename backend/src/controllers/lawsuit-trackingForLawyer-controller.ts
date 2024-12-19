@@ -95,23 +95,27 @@ export const updateLawsuitWithFiles = async (
     let newUploadedFiles: mongoose.Types.ObjectId[] = [];
     if (files && files.length > 0) {
       newUploadedFiles = await Promise.all(
-        files.map(async (file): Promise<mongoose.Types.ObjectId> => {
-          const s3Response = await uploadToS3(file);
-          const fileUrl = s3Response.files[0]?.url;
+        files.map(async (file, index): Promise<mongoose.Types.ObjectId> => {
+          try {
+            const s3Response = await uploadToS3(file); // AWS S3'e dosya yükleme
+            const fileUrl = s3Response.signedUrl; // Signed URL alınıyor
 
-          if (!fileUrl) {
-            throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+            if (!fileUrl) {
+              throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+            }
+
+            const newFile = new FileModel({
+              fileType: fileType || null,
+              fileUrl,
+              description: description || null,
+            });
+
+            const savedFile = await newFile.save({ session });
+            return savedFile._id as mongoose.Types.ObjectId;
+          } catch (error) {
+            console.error(`Dosya (${file.originalname}) yüklenirken hata:`, error);
+            throw new Error(`Dosya yüklenemedi: ${file.originalname}`);
           }
-
-          const newFile = new FileModel({
-            fileType,
-            fileUrl,
-            description: description || null,
-          });
-
-          const savedFile = await newFile.save({ session });
-
-          return savedFile._id as mongoose.Types.ObjectId;
         })
       );
     }
@@ -123,8 +127,7 @@ export const updateLawsuitWithFiles = async (
     lawsuit.courtFileNo = courtFileNo || lawsuit.courtFileNo;
     lawsuit.lawsuitDate = lawsuitDate || lawsuit.lawsuitDate;
     lawsuit.caseNumber = caseNumber || lawsuit.caseNumber;
-    lawsuit.resultDescription =
-      resultDescription || lawsuit.resultDescription;
+    lawsuit.resultDescription = resultDescription || lawsuit.resultDescription;
     lawsuit.resultStage = resultStage || lawsuit.resultStage;
 
     // Yeni dosyaları mevcut dosya listesine ekle
@@ -144,24 +147,24 @@ export const updateLawsuitWithFiles = async (
     });
   } catch (error) {
     console.error("Dava güncelleme sırasında hata oluştu:", error);
-  
+
     await session.abortTransaction();
     session.endSession();
-  
-    // error türünü kontrol et
+
     if (error instanceof Error) {
       return res.status(500).json({
         message: "Dava güncellenirken bir hata oluştu.",
         error: error.message,
       });
     }
-    // Eğer error, Error tipinde değilse
+
     return res.status(500).json({
       message: "Dava güncellenirken bilinmeyen bir hata oluştu.",
       error: String(error),
     });
-  }  
+  }
 };
+
 
 
 

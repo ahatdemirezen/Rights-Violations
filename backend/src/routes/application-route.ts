@@ -4,9 +4,9 @@ import {
   getAllApplications,
   getApplicationById,
   updateApplication,
-  deleteApplication,
   getDocumentTypes,
 } from "../controllers/application-controller";
+
 import multer from "multer";
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() }); // Bellekte dosyaları sakla
@@ -18,8 +18,7 @@ router.get("/applications", getAllApplications);
 router.get("/:id", getApplicationById);
 // Başvuru düzenleme
 router.put("/:id", upload.array("files"), updateApplication);
-// Başvuru silme
-router.delete("/:id", deleteApplication);
 
 router.get("/document-types", getDocumentTypes);
+
 export default router;

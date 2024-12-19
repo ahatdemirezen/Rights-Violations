@@ -34,26 +34,31 @@ export const createLawsuitWithFilesService = async (
 
     const applicationNumber = applicationExists.applicationNumber;
     const applicantName = applicationExists.applicantName || "";
-    const organizationName = applicationExists.organizationName || ""; // Eklenen kısım
+    const organizationName = applicationExists.organizationName || "";
 
     // 2. Dosyaları S3'e yükle ve FileModel'e kaydet
     const uploadedFiles = await Promise.all(
       files.map(async (file, index) => {
-        const s3Response = await uploadToS3(file);
-        const fileUrl = s3Response.files[0]?.url;
+        try {
+          const s3Response = await uploadToS3(file); // AWS S3'e dosya yükleme
+          const fileUrl = s3Response.signedUrl; // Signed URL alınıyor
 
-        if (!fileUrl) {
-          throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+          if (!fileUrl) {
+            throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+          }
+
+          const newFile = new FileModel({
+            fileType: fileTypes[index] || null,
+            fileUrl,
+            description: fileDescriptions[index] || null,
+          });
+
+          const savedFile = await newFile.save({ session });
+          return savedFile._id;
+        } catch (error) {
+          console.error(`Dosya (${file.originalname}) yüklenirken hata:`, error);
+          throw new Error(`Dosya yüklenemedi: ${file.originalname}`);
         }
-
-        const newFile = new FileModel({
-          fileType: fileTypes[index] || null,
-          fileUrl,
-          description: fileDescriptions[index] || null,
-        });
-
-        const savedFile = await newFile.save({ session });
-        return savedFile._id;
       })
     );
 
@@ -62,7 +67,7 @@ export const createLawsuitWithFilesService = async (
       applicationId,
       applicationNumber,
       applicantName,
-      organizationName, // Eklenen kısım
+      organizationName,
       caseSubject,
       fileNumber,
       courtFileNo,
@@ -77,8 +82,8 @@ export const createLawsuitWithFilesService = async (
     // 4. Application'daki lawsuitCreated alanını güncelle
     await ApplicationModel.findByIdAndUpdate(
       applicationId,
-      { lawsuitCreated: true }, // `lawsuitCreated` alanını `true` yap
-      { session, new: true } // Transaction ile güvenli güncelleme
+      { lawsuitCreated: true },
+      { session, new: true }
     );
 
     // Transaction'ı tamamla
@@ -89,9 +94,11 @@ export const createLawsuitWithFilesService = async (
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+    console.error("Dava oluşturulurken hata:", error);
     throw error;
   }
 };
+
 
 export const getLawsuitByIdService = async (lawsuitId: string) => {
     // Dava bilgilerini getir ve applicationId içindeki lawyer bilgilerini populate et
@@ -172,29 +179,24 @@ export const getLawsuitByIdService = async (lawsuitId: string) => {
         throw createHttpError(404, "Lawsuit with the provided ID does not exist.");
       }
   
-      // 2. Yeni dosyaları S3'e yükle ve FileModel'e kaydet
-      let newUploadedFiles: mongoose.Types.ObjectId[] = [];
-      if (files && files.length > 0) {
-        newUploadedFiles = await Promise.all(
-          files.map(async (file): Promise<mongoose.Types.ObjectId> => {
-            const s3Response = await uploadToS3(file);
-            const fileUrl = s3Response.files[0]?.url;
-  
-            if (!fileUrl) {
-              throw new Error("S3 yanıtından dosya URL'si alınamadı.");
-            }
-  
-            const newFile = new FileModel({
-              fileType,
-              fileUrl,
-              description: description || null,
-            });
-  
-            const savedFile = await newFile.save({ session });
-            return savedFile._id as mongoose.Types.ObjectId;
-          })
-        );
-      }
+     // 2. Yeni dosyaları S3'e yükle ve FileModel'e kaydet
+    let newUploadedFiles: mongoose.Types.ObjectId[] = [];
+    if (files && files.length > 0) {
+      newUploadedFiles = await Promise.all(
+        files.map(async (file): Promise<mongoose.Types.ObjectId> => {
+          const { key, signedUrl } = await uploadToS3(file); // uploadToS3 metodundan key ve URL alınıyor
+          
+          const newFile = new FileModel({
+            fileType,
+            fileUrl: signedUrl, // Signed URL kullanılıyor
+            description: description || null,
+          });
+
+          const savedFile = await newFile.save({ session });
+          return savedFile._id as mongoose.Types.ObjectId;
+        })
+      );
+    }
   
       // 3. Mevcut dava bilgilerini güncelle
       lawsuit.caseSubject = caseSubject || lawsuit.caseSubject;

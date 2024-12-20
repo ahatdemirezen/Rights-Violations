@@ -75,20 +75,25 @@ const updateLawsuitWithFiles = (req, res, next) => __awaiter(void 0, void 0, voi
         // 3. Yeni dosyaları S3'e yükle ve FileModel'e kaydet
         let newUploadedFiles = [];
         if (files && files.length > 0) {
-            newUploadedFiles = yield Promise.all(files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
-                var _a;
-                const s3Response = yield (0, S3_controller_1.uploadToS3)(file);
-                const fileUrl = (_a = s3Response.files[0]) === null || _a === void 0 ? void 0 : _a.url;
-                if (!fileUrl) {
-                    throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+            newUploadedFiles = yield Promise.all(files.map((file, index) => __awaiter(void 0, void 0, void 0, function* () {
+                try {
+                    const s3Response = yield (0, S3_controller_1.uploadToS3)(file); // AWS S3'e dosya yükleme
+                    const fileUrl = s3Response.signedUrl; // Signed URL alınıyor
+                    if (!fileUrl) {
+                        throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+                    }
+                    const newFile = new files_model_1.FileModel({
+                        fileType: fileType || null,
+                        fileUrl,
+                        description: description || null,
+                    });
+                    const savedFile = yield newFile.save({ session });
+                    return savedFile._id;
                 }
-                const newFile = new files_model_1.FileModel({
-                    fileType,
-                    fileUrl,
-                    description: description || null,
-                });
-                const savedFile = yield newFile.save({ session });
-                return savedFile._id;
+                catch (error) {
+                    console.error(`Dosya (${file.originalname}) yüklenirken hata:`, error);
+                    throw new Error(`Dosya yüklenemedi: ${file.originalname}`);
+                }
             })));
         }
         // 4. Mevcut dava bilgilerini güncelle
@@ -98,8 +103,7 @@ const updateLawsuitWithFiles = (req, res, next) => __awaiter(void 0, void 0, voi
         lawsuit.courtFileNo = courtFileNo || lawsuit.courtFileNo;
         lawsuit.lawsuitDate = lawsuitDate || lawsuit.lawsuitDate;
         lawsuit.caseNumber = caseNumber || lawsuit.caseNumber;
-        lawsuit.resultDescription =
-            resultDescription || lawsuit.resultDescription;
+        lawsuit.resultDescription = resultDescription || lawsuit.resultDescription;
         lawsuit.resultStage = resultStage || lawsuit.resultStage;
         // Yeni dosyaları mevcut dosya listesine ekle
         lawsuit.files = [...(lawsuit.files || []), ...newUploadedFiles];
@@ -118,14 +122,12 @@ const updateLawsuitWithFiles = (req, res, next) => __awaiter(void 0, void 0, voi
         console.error("Dava güncelleme sırasında hata oluştu:", error);
         yield session.abortTransaction();
         session.endSession();
-        // error türünü kontrol et
         if (error instanceof Error) {
             return res.status(500).json({
                 message: "Dava güncellenirken bir hata oluştu.",
                 error: error.message,
             });
         }
-        // Eğer error, Error tipinde değilse
         return res.status(500).json({
             message: "Dava güncellenirken bilinmeyen bir hata oluştu.",
             error: String(error),

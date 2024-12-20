@@ -19,7 +19,6 @@ const S3_controller_1 = require("../controllers/S3-controller");
 const mongoose_1 = __importDefault(require("mongoose"));
 const user_model_1 = require("../models/user-model");
 const createApplicationService = (applicationData, files) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     const { applicantName, receivedBy, nationalID, applicationType, applicationDate, organizationName, address, phoneNumber, email, complaintReason, eventCategories, links = [], descriptions = [], types = [], } = applicationData;
     const existingApplication = yield application_model_1.ApplicationModel.findOne({ nationalID });
     if (existingApplication) {
@@ -51,14 +50,11 @@ const createApplicationService = (applicationData, files) => __awaiter(void 0, v
             const description = Array.isArray(descriptions) ? descriptions[i] : descriptions || `Document ${i + 1}`;
             const type = Array.isArray(types) ? types[i] : types || "Other";
             try {
-                const s3Response = yield (0, S3_controller_1.uploadToS3)(file);
-                const documentUrl = (_b = (_a = s3Response.files) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.url;
-                if (!documentUrl)
-                    throw new Error("S3 URL alınamadı.");
+                const { signedUrl } = yield (0, S3_controller_1.uploadToS3)(file); // Signed URL alınıyor
                 const documentId = yield (0, helper_1.saveDocument)("files", {
                     description,
                     type,
-                    url: documentUrl,
+                    url: signedUrl,
                 });
                 documents.push(documentId);
             }
@@ -150,6 +146,7 @@ const getApplicationByIdService = (id) => __awaiter(void 0, void 0, void 0, func
 });
 exports.getApplicationByIdService = getApplicationByIdService;
 const updateApplicationService = (req, id) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d;
     const updatedFields = Object.assign({}, req.body);
     // Mevcut başvuruyu alın
     const existingApplication = yield application_model_1.ApplicationModel.findById(id).populate("documents");
@@ -157,11 +154,23 @@ const updateApplicationService = (req, id) => __awaiter(void 0, void 0, void 0, 
         throw new Error("Başvuru bulunamadı.");
     }
     let existingDocuments = existingApplication.documents;
-    // Dosyaları işleyin ve yeni belgeleri ekleyin
+    // Yeni dosyaları işleyip belgeleri ekleyin
     if (req.files && Array.isArray(req.files)) {
-        const newDocumentIds = yield (0, helper_1.processDocuments)(req.body.descriptions || [], req.body.types || [], req.files, req.body.links || []);
-        // Mevcut ve yeni belgeleri birleştir
-        existingDocuments = [...existingDocuments, ...newDocumentIds];
+        try {
+            const newDocumentIds = yield (0, helper_1.processDocuments)({
+                files: ((_a = req.body.descriptions) === null || _a === void 0 ? void 0 : _a.files) || [],
+                links: ((_b = req.body.descriptions) === null || _b === void 0 ? void 0 : _b.links) || [],
+            }, {
+                files: ((_c = req.body.types) === null || _c === void 0 ? void 0 : _c.files) || [],
+                links: ((_d = req.body.types) === null || _d === void 0 ? void 0 : _d.links) || [],
+            }, req.files, req.body.links || []);
+            // Mevcut ve yeni belgeleri birleştir
+            existingDocuments = [...existingDocuments, ...newDocumentIds];
+        }
+        catch (error) {
+            console.error("Dosyalar işlenirken hata:", error);
+            throw new Error("Dosyalar yüklenemedi.");
+        }
     }
     // Güncellenmiş belgeleri ekleyin
     updatedFields.documents = existingDocuments;

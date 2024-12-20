@@ -76,7 +76,7 @@ app.get("/", (req, res) => {
 });
 // API rotaları
 app.use("/api/login", baro_login_route_1.default);
-app.use("/api/lawyer", lawyer_route_1.default);
+app.use("/api/lawyer", admin_auth_1.authenticateAdmin, lawyer_route_1.default);
 app.use("/api/lawsuittracking", admin_auth_1.authenticateAdmin, lawsuit_tracking_route_1.default);
 app.use('/api/applications', admin_auth_1.authenticateAdmin, application_route_1.default);
 app.use('/api/lawyerapplication', applicationForLawyer_route_1.default);

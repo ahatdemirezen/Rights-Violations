@@ -16,7 +16,4 @@ router.get("/applications", application_controller_1.getAllApplications);
 router.get("/:id", application_controller_1.getApplicationById);
 // Başvuru düzenleme
 router.put("/:id", upload.array("files"), application_controller_1.updateApplication);
-// Başvuru silme
-router.delete("/:id", application_controller_1.deleteApplication);
-router.get("/document-types", application_controller_1.getDocumentTypes);
 exports.default = router;

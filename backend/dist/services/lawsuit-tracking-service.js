@@ -35,29 +35,34 @@ const createLawsuitWithFilesService = (applicationId, body, files) => __awaiter(
         }
         const applicationNumber = applicationExists.applicationNumber;
         const applicantName = applicationExists.applicantName || "";
-        const organizationName = applicationExists.organizationName || ""; // Eklenen kısım
+        const organizationName = applicationExists.organizationName || "";
         // 2. Dosyaları S3'e yükle ve FileModel'e kaydet
         const uploadedFiles = yield Promise.all(files.map((file, index) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
-            const s3Response = yield (0, S3_controller_1.uploadToS3)(file);
-            const fileUrl = (_a = s3Response.files[0]) === null || _a === void 0 ? void 0 : _a.url;
-            if (!fileUrl) {
-                throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+            try {
+                const s3Response = yield (0, S3_controller_1.uploadToS3)(file); // AWS S3'e dosya yükleme
+                const fileUrl = s3Response.signedUrl; // Signed URL alınıyor
+                if (!fileUrl) {
+                    throw new Error("S3 yanıtından dosya URL'si alınamadı.");
+                }
+                const newFile = new files_model_1.FileModel({
+                    fileType: fileTypes[index] || null,
+                    fileUrl,
+                    description: fileDescriptions[index] || null,
+                });
+                const savedFile = yield newFile.save({ session });
+                return savedFile._id;
             }
-            const newFile = new files_model_1.FileModel({
-                fileType: fileTypes[index] || null,
-                fileUrl,
-                description: fileDescriptions[index] || null,
-            });
-            const savedFile = yield newFile.save({ session });
-            return savedFile._id;
+            catch (error) {
+                console.error(`Dosya (${file.originalname}) yüklenirken hata:`, error);
+                throw new Error(`Dosya yüklenemedi: ${file.originalname}`);
+            }
         })));
         // 3. Yeni dava oluştur ve dosyaları ilişkilendir
         const newLawsuit = new lawsuitTracking_model_1.LawsuitTrackingModel({
             applicationId,
             applicationNumber,
             applicantName,
-            organizationName, // Eklenen kısım
+            organizationName,
             caseSubject,
             fileNumber,
             courtFileNo,
@@ -68,9 +73,7 @@ const createLawsuitWithFilesService = (applicationId, body, files) => __awaiter(
         });
         const savedLawsuit = yield newLawsuit.save({ session });
         // 4. Application'daki lawsuitCreated alanını güncelle
-        yield application_model_1.ApplicationModel.findByIdAndUpdate(applicationId, { lawsuitCreated: true }, // `lawsuitCreated` alanını `true` yap
-        { session, new: true } // Transaction ile güvenli güncelleme
-        );
+        yield application_model_1.ApplicationModel.findByIdAndUpdate(applicationId, { lawsuitCreated: true }, { session, new: true });
         // Transaction'ı tamamla
         yield session.commitTransaction();
         session.endSession();
@@ -79,6 +82,7 @@ const createLawsuitWithFilesService = (applicationId, body, files) => __awaiter(
     catch (error) {
         yield session.abortTransaction();
         session.endSession();
+        console.error("Dava oluşturulurken hata:", error);
         throw error;
     }
 });
@@ -136,15 +140,10 @@ const updateLawsuitWithFilesService = (lawsuitId, body, files) => __awaiter(void
         let newUploadedFiles = [];
         if (files && files.length > 0) {
             newUploadedFiles = yield Promise.all(files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
-                var _a;
-                const s3Response = yield (0, S3_controller_1.uploadToS3)(file);
-                const fileUrl = (_a = s3Response.files[0]) === null || _a === void 0 ? void 0 : _a.url;
-                if (!fileUrl) {
-                    throw new Error("S3 yanıtından dosya URL'si alınamadı.");
-                }
+                const { key, signedUrl } = yield (0, S3_controller_1.uploadToS3)(file); // uploadToS3 metodundan key ve URL alınıyor
                 const newFile = new files_model_1.FileModel({
                     fileType,
-                    fileUrl,
+                    fileUrl: signedUrl, // Signed URL kullanılıyor
                     description: description || null,
                 });
                 const savedFile = yield newFile.save({ session });

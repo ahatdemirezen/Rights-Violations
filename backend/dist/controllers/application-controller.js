@@ -9,10 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteApplication = exports.updateApplication = exports.getDocumentTypes = exports.getApplicationById = exports.getAllApplications = exports.createApplication = void 0;
-const application_model_1 = require("../models/application-model");
-const document_model_1 = require("../models/document-model");
-const S3_controller_1 = require("../controllers/S3-controller");
+exports.updateApplication = exports.getApplicationById = exports.getAllApplications = exports.createApplication = void 0;
 const application_service_1 = require("../services/application-service"); // Service katmanı import ediliyor
 const createApplication = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -86,25 +83,6 @@ const getApplicationById = (req, res, next) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getApplicationById = getApplicationById;
-const getDocumentTypes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // Sabit tür listesini tanımlayın
-        const documentTypes = [
-            "Media Screening",
-            "NGO Data",
-            "Bar Commissions",
-            "Public Institutions",
-            "Other",
-        ];
-        // Tür listesini dön
-        res.status(200).json({ documentTypes });
-    }
-    catch (error) {
-        console.error("Hata:");
-        res.status(500).json({ error: "Dosya türleri alınamadı." });
-    }
-});
-exports.getDocumentTypes = getDocumentTypes;
 const updateApplication = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
@@ -122,34 +100,6 @@ const updateApplication = (req, res, next) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.updateApplication = updateApplication;
-const deleteApplication = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    try {
-        const application = yield application_model_1.ApplicationModel.findById(id).populate("documents");
-        if (!application) {
-            res.status(404).json({ error: "Başvuru bulunamadı." });
-            return;
-        }
-        for (const documentId of application.documents) {
-            const document = yield document_model_1.DocumentModel.findById(documentId);
-            if (document) {
-                for (const doc of document.documents) {
-                    if (doc.documentUrl) {
-                        yield (0, S3_controller_1.deleteFileFromS3)(doc.documentUrl);
-                    }
-                }
-                yield document_model_1.DocumentModel.findByIdAndDelete(documentId);
-            }
-        }
-        yield application_model_1.ApplicationModel.findByIdAndDelete(id);
-        res.status(200).json({ message: "Başvuru ve ilgili dokümanlar başarıyla silindi." });
-    }
-    catch (error) {
-        console.error("Hata:", error.message);
-        res.status(500).json({ error: "Başvuru silinirken hata oluştu.", details: error.message });
-    }
-});
-exports.deleteApplication = deleteApplication;
 function createHttpError(arg0, arg1) {
     throw new Error("Function not implemented.");
 }

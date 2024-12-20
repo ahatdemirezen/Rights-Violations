@@ -14,7 +14,6 @@ const application_model_1 = require("../models/application-model");
 const S3_controller_1 = require("../controllers/S3-controller");
 const helper_1 = require("../helper/helper");
 const createApplicationCitizenService = (data, files) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     const { applicantName, nationalID, email, applicationType, applicationDate, organizationName, address, phoneNumber, complaintReason, eventCategories, links = [], descriptions = [], types = [], } = data;
     // National ID Kontrolü
     const existingApplication = yield application_model_1.ApplicationModel.findOne({ nationalID });
@@ -45,16 +44,19 @@ const createApplicationCitizenService = (data, files) => __awaiter(void 0, void 
             const file = files[i];
             const description = Array.isArray(descriptions) ? descriptions[i] : descriptions || `Document ${i + 1}`;
             const type = Array.isArray(types) ? types[i] : types || "Other";
-            const s3Response = yield (0, S3_controller_1.uploadToS3)(file);
-            const documentUrl = (_b = (_a = s3Response.files) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.url;
-            if (!documentUrl)
-                throw new Error("S3 URL alınamadı.");
-            const documentId = yield (0, helper_1.saveDocument)("files", {
-                description,
-                type,
-                url: documentUrl,
-            });
-            documents.push(documentId);
+            try {
+                const { signedUrl } = yield (0, S3_controller_1.uploadToS3)(file); // Signed URL alınıyor
+                const documentId = yield (0, helper_1.saveDocument)("files", {
+                    description,
+                    type,
+                    url: signedUrl,
+                });
+                documents.push(documentId);
+            }
+            catch (error) {
+                console.error("Dosya yüklenirken hata:", error);
+                throw new Error("Dosya yüklenemedi.");
+            }
         }
     }
     // Linkleri İşleme

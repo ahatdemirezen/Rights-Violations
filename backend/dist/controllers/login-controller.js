@@ -53,7 +53,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs")); // Şifre karşılaşt�
 dotenv.config();
 // .env dosyasındaki verileri kullanabilmek için dotenv'i başlatıyoruz
 const jwtSecret = process.env.JWT_SECRET;
-const jwtExpiresIn = "2m"; // Access token süresi 2 dakika
+const jwtExpiresIn = "15m"; // Access token süresi 2 dakika
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET; // Refresh token için ayrı bir secret
 const jwtRefreshExpiresIn = "1d"; // Refresh token süresi 1 gün
 // Access token oluşturma
@@ -95,7 +95,7 @@ const LoginControl = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         res.cookie("token", accessToken, {
             httpOnly: true, // javascript saldırısı önlemek için kullanılmıştır document.Cookie().
             secure: process.env.NODE_ENV === "production",
-            maxAge: 2 * 60 * 1000, // 2 dakika
+            maxAge: 15 * 60 * 1000, // 15 dakika
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
         });
         // Refresh token'ı HTTP-Only cookie olarak ekle
@@ -134,7 +134,7 @@ const refreshAccessToken = (req, res, next) => __awaiter(void 0, void 0, void 0,
         res.cookie("token", newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 2 * 60 * 1000, // 2 dakika
+            maxAge: 15 * 60 * 1000, // 15 dakika
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
         });
         res.status(200).json({ message: "Access token refreshed successfully" });

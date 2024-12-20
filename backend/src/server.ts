@@ -38,7 +38,7 @@ app.get("/", (req: Request, res: Response) => {
 
 // API rotaları
 app.use("/api/login", loginRoute);
-app.use("/api/lawyer",  lawyerRoute);
+app.use("/api/lawyer", authenticateAdmin , lawyerRoute);
 app.use("/api/lawsuittracking" , authenticateAdmin , lawsuitTrackingRoutes)
 app.use('/api/applications', authenticateAdmin , applicationRoutes);
 app.use('/api/lawyerapplication', applicationForLawyerRoutes )

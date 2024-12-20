@@ -9,7 +9,7 @@ dotenv.config();
 
 // .env dosyasındaki verileri kullanabilmek için dotenv'i başlatıyoruz
 const jwtSecret = process.env.JWT_SECRET;
-const jwtExpiresIn = "2m"; // Access token süresi 2 dakika
+const jwtExpiresIn = "15m"; // Access token süresi 2 dakika
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET; // Refresh token için ayrı bir secret
 const jwtRefreshExpiresIn = "1d"; // Refresh token süresi 1 gün
 
@@ -59,7 +59,7 @@ const refreshToken = createRefreshToken(user._id.toString(), user.name, user.rol
     res.cookie("token", accessToken, {
       httpOnly: true,   // javascript saldırısı önlemek için kullanılmıştır document.Cookie().
       secure: process.env.NODE_ENV === "production",
-      maxAge: 2 * 60 * 1000, // 2 dakika
+      maxAge: 15 * 60 * 1000, // 15 dakika
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",   // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
 
@@ -108,7 +108,7 @@ export const refreshAccessToken = async (
     res.cookie("token", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 2 * 60 * 1000, // 2 dakika
+      maxAge: 15 * 60 * 1000, // 15 dakika
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",   // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
 

@@ -56,6 +56,10 @@ const LawyerForm = ({ isOpen, onClose }) => {
               maxLength="11"
               pattern="\d{11}"
             />
+              {/* Doğrulama Mesajı */}
+           {!/^\d{11}$/.test(formData.nationalID) && formData.nationalID.length > 0 && (
+           <p className="text-red-500 text-sm mt-2">T.C. Kimlik Numarası 11 haneli olmalıdır.</p>
+            )}
           </div>
 
           {/* İsim */}

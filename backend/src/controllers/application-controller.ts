@@ -84,28 +84,6 @@ export const getApplicationById = async (req: Request, res: Response, next: Next
 };
 
 
-
-export const getDocumentTypes = async (req: Request, res: Response): Promise<void>  => {
-  try {
-    // Sabit tür listesini tanımlayın
-    const documentTypes = [
-      "Media Screening",
-      "NGO Data",
-      "Bar Commissions",
-      "Public Institutions",
-      "Other",
-    ];
-
-    // Tür listesini dön
-    res.status(200).json({ documentTypes });
-  } catch (error) {
-    console.error("Hata:");
-    res.status(500).json({ error: "Dosya türleri alınamadı." });
-  }
-};
-
-
-
 export const updateApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;
   try {

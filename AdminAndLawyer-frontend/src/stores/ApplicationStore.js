@@ -89,22 +89,6 @@ const useApplicationStore = () => {
     }
   };
 
-
-  const fetchDocumentTypes = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axiosInstance.get(`${apiUrl}/applications/document-types` ,{
-        withCredentials: true,
-      } );
-      setDocumentTypes(response.data.documentTypes || []);
-    } catch (err) {
-      handleError(err, "Dosya türleri alınırken bir hata oluştu!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchApplicationById = async (id) => {
     setLoading(true);
     setError(null);
@@ -226,7 +210,6 @@ const useApplicationStore = () => {
     loading,
     error,
     fetchApplications,
-    fetchDocumentTypes,
     fetchApplicationById,
     updateApplication,
     createApplication, // Yeni eklenen fonksiyon

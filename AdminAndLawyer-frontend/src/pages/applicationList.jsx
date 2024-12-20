@@ -202,7 +202,6 @@ const ApplicationListPage = () => {
     </tr>
   ))}
 </tbody>
-
           </table>
         </div>
       )}

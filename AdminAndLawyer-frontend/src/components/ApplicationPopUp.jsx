@@ -166,13 +166,6 @@ const ApplicationEditModal = ({ application,applicationId, onClose, onSave }) =>
       });
     }
   };
-  
-
-const { fetchDocumentTypes } = useApplicationStore();
-
-useEffect(() => {
-  fetchDocumentTypes(); // Store'dan çağırıyoruz
-}, []);
 
 
 const { fetchApplicationById, s3Files } = useApplicationStore();
@@ -372,92 +365,116 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
 </div>
 
           </div>    
+          <div>
+  <label className="block text-gray-700">Document Type:</label>
+  <select
+    name="documentType"
+    value={formData.documentType}
+    onChange={handleInputChange}
+className="w-full p-2 border border-gray-300 rounded max-w-sm"
+  >
+    <option value="files">File</option>
+    <option value="link">Link</option>
+  </select>
+</div>
           <div className="border p-2 mt-4 bg-yellow-50 rounded shadow-sm max-w-lg mx-auto">
           <h3 className="text-lg font-bold mb-2 text-gray-800">Dosya Ekleme Alanı</h3>
 
- {/* Eklenen Dosyaların Görüntülenmesi */}
+{/* Eklenen Dosyaların Görüntülenmesi */}
 {formData.files.length > 0 && (
-  <div className="border p-2 mt-2 bg-white rounded shadow-sm max-h-48 overflow-y-auto max-w-md mx-auto">
-  <h3 className="text-lg font-bold mb-2 text-gray-800">Yüklenen Dosyalar</h3>
-    <div className="grid grid-cols-3 gap-4">
-    {formData.files.map((file, index) => (
-  <div
-  key={`${file.file?.name || 'file'}-${index}`}
-  className="p-4 border rounded-lg bg-gray-50 shadow-md flex flex-col space-y-2 relative max-h-40 overflow-y-auto"
-  >
-    {/* Dosya Önizleme */}
-    {file.file && (
-      <div className="flex justify-center items-center mb-2">
-        {file.file.type.startsWith("image/") ? (
-          <img
-            src={URL.createObjectURL(file.file)}
-            alt="Preview"
-            className="h-16 w-16 object-cover rounded cursor-pointer"
-            onClick={() => openPreview(file.file)} // Önizleme için tıklama
-          />
-        ) : (
+  <div className="border p-4 mt-2 bg-white rounded shadow-sm max-h-60 overflow-y-auto max-w-md mx-auto">
+    <h3 className="text-lg font-bold mb-2 text-gray-800">Yüklenen Dosyalar</h3>
+    <div className="grid grid-cols-1 gap-4">
+      {formData.files.map((file, index) => (
+        <div
+          key={`${file.file?.name || "file"}-${index}`}
+          className="p-4 border rounded-lg bg-gray-50 shadow-md flex flex-col space-y-4"
+        >
+          {/* Dosya Önizleme */}
+          <div className="flex items-center space-x-4">
+            {file.file && file.file.type.startsWith("image/") ? (
+              <img
+                src={URL.createObjectURL(file.file)}
+                alt="Preview"
+                className="h-20 w-20 object-cover rounded shadow-md cursor-pointer"
+                onClick={() => openPreview(file.file)} // Önizleme için tıklama
+              />
+            ) : (
+              <div className="bg-gray-200 h-20 w-20 flex items-center justify-center rounded shadow-md">
+                <span className="text-gray-600">Dosya</span>
+              </div>
+            )}
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-700">{file.file.name}</p>
+              <p className="text-sm text-gray-500">
+                Boyut: {(file.file.size / 1024).toFixed(2)} KB
+              </p>
+            </div>
+          </div>
+
+          {/* Dosya Açıklama Alanı */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Dosya Açıklaması:
+            </label>
+            <input
+              type="text"
+              value={file.description}
+              onChange={(e) => {
+                const updatedFiles = [...formData.files];
+                updatedFiles[index].description = e.target.value;
+                setFormData({ ...formData, files: updatedFiles });
+              }}
+              className="w-full p-2 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              placeholder="Açıklama giriniz"
+            />
+          </div>
+
+          {/* Dosya Türü Seçimi */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Dosya Türü:
+            </label>
+            <select
+              value={file.type}
+              onChange={(e) => {
+                const updatedFiles = [...formData.files];
+                updatedFiles[index].type = e.target.value;
+                setFormData({ ...formData, files: updatedFiles });
+              }}
+              className="w-full p-2 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              <option value="">Tür Seçin</option>
+              <option value="Media Screening">Media Screening</option>
+              <option value="NGO Data">NGO Data</option>
+              <option value="Bar Commissions">Bar Commissions</option>
+              <option value="Public Institutions">Public Institutions</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Dosya Silme Butonu */}
           <button
-            onClick={() => openPreview(file.file)} // Dosya önizleme butonu
-            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-sm"
+            onClick={() => {
+              const updatedFiles = formData.files.filter((_, i) => i !== index);
+              setFormData({ ...formData, files: updatedFiles });
+            }}
+            className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
           >
-            Önizleme
+            Dosyayı Kaldır
           </button>
-        )}
-      </div>
-    )}
-
-    {/* Dosya Açıklama */}
-    <div>
-      <label className="block text-sm font-semibold text-gray-700">
-        Dosya Açıklaması:
-      </label>
-      <input
-        type="text"
-        value={file.description}
-        onChange={(e) => {
-          const updatedFiles = [...formData.files];
-          updatedFiles[index].description = e.target.value;
-          setFormData({ ...formData, files: updatedFiles });
-        }}
-        className="w-full p-1 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
-      />
-    </div>
-
-    {/* Dosya Türü */}
-    <div>
-      <label className="block text-sm font-semibold text-gray-700">
-        Dosya Türü:
-      </label>
-      <select
-        value={file.type}
-        onChange={(e) => {
-          const updatedFiles = [...formData.files];
-          updatedFiles[index].type = e.target.value;
-          setFormData({ ...formData, files: updatedFiles });
-        }}
-        className="w-full p-1 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
-      >
-        <option value="">Tür Seçin</option>
-        <option value="Media Screening">Media Screening</option>
-        <option value="NGO Data">NGO Data</option>
-        <option value="Bar Commissions">Bar Commissions</option>
-        <option value="Public Institutions">Public Institutions</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-  </div>
-))}
-
+        </div>
+      ))}
     </div>
   </div>
 )}
+
 {/* Pop-Up Modal */}
 {isModalOpen && previewFile && (
   <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-4 max-w-3xl">
+    <div className="bg-white rounded-lg p-6 max-w-3xl">
       <h3 className="text-lg font-bold mb-4">Dosya Önizlemesi</h3>
       <div className="flex justify-center items-center">
-        {/* Görsel veya Önizleme */}
         {previewFile.type.startsWith("image/") ? (
           <img
             src={URL.createObjectURL(previewFile)}
@@ -477,6 +494,7 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
     </div>
   </div>
 )}
+
 
 
   {/* Dosya Yükleme */}
@@ -545,21 +563,6 @@ className="w-full p-2 border border-gray-300 rounded max-w-sm"
     <p className="text-gray-500">Mevcut dosya veya link bulunamadı.</p>
   )}
 </div>
-
-
-<div>
-  <label className="block text-gray-700">Document Type:</label>
-  <select
-    name="documentType"
-    value={formData.documentType}
-    onChange={handleInputChange}
-className="w-full p-2 border border-gray-300 rounded max-w-sm"
-  >
-    <option value="files">File</option>
-    <option value="link">Link</option>
-  </select>
-</div>
-
 
 
 {/* Link Girişi */}

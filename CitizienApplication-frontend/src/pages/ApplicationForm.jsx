@@ -212,7 +212,7 @@ return (
       width: "90%", // Küçük ekranlar için %90 genişlik
       maxWidth: "550px", // Maksimum genişliği küçültüldü
       maxHeight: "100%", // Kartın boyu ekranı aşarsa kırpar
-      marginTop: "-100px", // Kart yukarı taşındı
+      marginTop: "-200px", // Kart yukarı taşındı
       display: "flex",
       
       flexDirection: "column",

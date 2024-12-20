@@ -4,7 +4,6 @@ import {
   getAllApplications,
   getApplicationById,
   updateApplication,
-  getDocumentTypes,
 } from "../controllers/application-controller";
 
 import multer from "multer";
@@ -18,7 +17,5 @@ router.get("/applications", getAllApplications);
 router.get("/:id", getApplicationById);
 // Başvuru düzenleme
 router.put("/:id", upload.array("files"), updateApplication);
-
-router.get("/document-types", getDocumentTypes);
 
 export default router;

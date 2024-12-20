@@ -33,7 +33,7 @@ export const uploadToS3 = async (file: Express.Multer.File): Promise<any> => {
     const signedUrl = await getSignedUrl(
       s3,
       new GetObjectCommand({ Bucket: bucketName, Key: fileKey }),
-      { expiresIn: 3600 } // Signed URL 1 saat geçerli
+      { expiresIn: 604800 } // 7 gün (7 * 24 * 60 * 60)
     );
 
     return {

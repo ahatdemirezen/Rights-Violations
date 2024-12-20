@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useApplicationListForLawyerStore from "../../stores/ApplicationListForLawyerStore";
+import { FaFileAlt, FaLink } from "react-icons/fa"; // Dosya ve link ikonları
 
 const ApplicationDetails = () => {
   const { applicationId } = useParams(); // URL'den applicationId al
@@ -62,48 +63,49 @@ const ApplicationDetails = () => {
               {applicationDetails.complaintReason}
             </p>
 
-            {/* Dosya ve Link Listesi */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#2C4E4A]">Dökümanlar:</h2>
-              {applicationDetails.populatedDocuments.length > 0 ? (
-                applicationDetails.populatedDocuments.map((doc, index) => (
-                  <div key={index} className="p-4 border border-gray-300 rounded-lg">
-                    <p className="text-gray-900">
-                      <strong className="text-[#2C4E4A]">Açıklama:</strong>{" "}
-                      {doc.documentDescription || "Açıklama Yok"}
-                    </p>
-                    {doc.documentSource && (
-                      <p className="text-gray-900">
-                        <strong className="text-[#2C4E4A]">Link:</strong>{" "}
-                        <a
-                          href={doc.documentSource}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Linke Git
-                        </a>
-                      </p>
-                    )}
-                    {doc.documentUrl && (
-                      <p className="text-gray-900">
-                        <strong className="text-[#2C4E4A]">Dosya:</strong>{" "}
-                        <a
-                          href={doc.documentUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Dosyayı Görüntüle
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">Hiçbir döküman mevcut değil.</p>
-              )}
-            </div>
+           {/* Dosya ve Link Listesi */}
+<div className="space-y-4">
+  <h2 className="text-2xl font-bold text-[#2C4E4A]">Dökümanlar:</h2>
+  {applicationDetails.populatedDocuments.length > 0 ? (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {applicationDetails.populatedDocuments.map((doc, index) => (
+        <div
+          key={index}
+          className="relative flex flex-col items-center bg-[#F3F4ED] p-4 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105 border border-[#6D8B74]"
+        >
+          {/* Dosya veya Link İkonu */}
+          <div className="text-[#6D8B74] text-6xl mb-2">
+            {doc.documentSource ? <FaLink /> : <FaFileAlt />}
+          </div>
+          {/* Dosya Bilgileri */}
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-800">
+              {doc.documentDescription || "Açıklama Yok"}
+            </p>
+            <p className="text-xs text-gray-600">
+              {doc.documentSource ? "Link" : "Dosya"}
+            </p>
+          </div>
+          {/* Hover Efekti */}
+          <a
+            href={doc.documentSource || doc.documentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 text-white font-medium text-sm rounded-lg transition-opacity"
+          >
+            Görmek İçin Tıklayın
+          </a>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-gray-500">Hiçbir döküman mevcut değil.</p>
+  )}
+</div>
+
+
+
+
           </div>
         ) : (
           <p className="text-center text-gray-500">Başvuru bulunamadı.</p>

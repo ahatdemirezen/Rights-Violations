@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
-
+//trycom
 const CitizenApplicationStore = () => {
   const [applications, setApplications] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);

@@ -4,10 +4,10 @@ import mongoose from 'mongoose';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const { name, password, gender, nationalID } = req.body;
+    const { name, password, gender, nationalID, email } = req.body;
 
     // Service katmanını çağır ve kullanıcıyı oluştur
-    const user = await createUserService({ name, password, gender, nationalID });
+    const user = await createUserService({ name, password, gender, nationalID, email });
 
     res.status(201).json({
       message: 'User created successfully',

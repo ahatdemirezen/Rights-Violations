@@ -6,11 +6,12 @@ export const createUserService = async (userData: {
   password: string;
   gender: Gender;
   nationalID: string;
+  email:string;
 }): Promise<any> => {
-  const { name, password, gender, nationalID } = userData;
+  const { name, password, gender, nationalID,email } = userData;
 
   // Gerekli alanların kontrolü
-  if (!name || !password || !gender || !nationalID) {
+  if (!name || !password || !gender || !nationalID || !email) {
     throw new Error('All fields are required');
   }
 
@@ -18,6 +19,12 @@ export const createUserService = async (userData: {
   if (nationalID.length !== 11 || isNaN(Number(nationalID))) {
     throw new Error('Invalid national ID');
   }
+
+   // Email doğrulama
+   const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+   if (!emailRegex.test(email)) {
+     throw new Error('Invalid email format');
+   }
 
   // Gender alanının sadece "male" veya "female" değerini kabul etmesi
   if (!Object.values(Gender).includes(gender)) {
@@ -35,6 +42,7 @@ export const createUserService = async (userData: {
     roles: [UserRole.Lawyer], // Rol otomatik olarak 'lawyer' olarak atanır
     gender, // Cinsiyet kullanıcıdan alınır
     nationalID, // TC kimlik numarası kullanıcıdan alınır
+    email, // Email kaydedilir
   });
 
   // Kullanıcıyı veritabanına kaydet
@@ -46,6 +54,8 @@ export const createUserService = async (userData: {
     roles: savedUser.roles,
     gender: savedUser.gender,
     nationalID: savedUser.nationalID,
+    email: savedUser.email,
+
   };
 };
 
@@ -59,6 +69,7 @@ export const getAllLawyersService = async (): Promise<any[]> => {
       name: lawyer.name,
       gender: lawyer.gender,
       nationalID: lawyer.nationalID,
+      email: lawyer.email,
       roles: lawyer.roles,
       createdAt: lawyer.createdAt,
       updatedAt: lawyer.updatedAt,
@@ -79,6 +90,7 @@ export const getAllLawyersService = async (): Promise<any[]> => {
       gender: deletedLawyer.gender,
       nationalID: deletedLawyer.nationalID,
       roles: deletedLawyer.roles,
+      email: deletedLawyer.email,
     };
   };
 
@@ -96,6 +108,7 @@ export const getAllLawyersService = async (): Promise<any[]> => {
       gender: lawyer.gender,
       nationalID: lawyer.nationalID,
       roles: lawyer.roles,
+      email: lawyer.email,
       createdAt: lawyer.createdAt,
       updatedAt: lawyer.updatedAt,
     };

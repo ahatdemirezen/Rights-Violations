@@ -46,21 +46,29 @@ export const createApplication = async (req: Request, res: Response): Promise<vo
 
 export const getAllApplications = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { documentType } = req.query;
+    // Query parametrelerini al
+    const { documentType, page, limit } = req.query;
 
-    const applications = await getAllApplicationsService(documentType as string); // Service çağrısı
+    // Service çağrısı
+    const result = await getAllApplicationsService({
+      documentType: documentType as string,
+      page: parseInt(page as string) || 1, // Varsayılan: 1. sayfa
+      limit: parseInt(limit as string) || 10, // Varsayılan: 10 öğe
+    });
 
-    if (!applications.length) {
+    if (!result.applications.length) {
       res.status(404).json({ message: "Hiç başvuru bulunamadı." });
       return;
     }
 
-    res.status(200).json({ applications });
+    // Başvuruları ve pagination bilgilerini döndür
+    res.status(200).json(result);
   } catch (error) {
     console.error("Hata:", error);
     res.status(500).json({ error: "Başvurular getirilirken hata oluştu." });
   }
 };
+
 
 export const getApplicationById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { id } = req.params;

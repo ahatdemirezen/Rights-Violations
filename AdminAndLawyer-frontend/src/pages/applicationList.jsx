@@ -4,6 +4,7 @@ import ApplicationEditModal from "../components/ApplicationPopUp"; // Mevcut det
 import CreateLawsuitModal from "../components/CreateLawsuitPopUp"; // Yeni pop-up bileşeni
 import SearchBar from "../components/SearchBar"; // SearchBar bileşenini ekledik
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/paginationComponent"; // Yeni Pagination bileşeni
 
 const ApplicationListPage = () => {
   const navigate = useNavigate();
@@ -20,12 +21,15 @@ const ApplicationListPage = () => {
   const [isLawsuitModalOpen, setIsLawsuitModalOpen] = useState(false); // Dava oluştur modal durumu
   const [filterStatus, setFilterStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // Arama terimi durumu
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetchApplications();
-  }, []);
+    fetchApplications(currentPage, 10); // Sayfa başına 10 öğe varsayılan.
+  }, [currentPage]); // currentPage değiştiğinde fetchApplications çağrılır.
+  
 
   const applicationList = applications.applications || [];
+  const totalPages = applications.totalPages || 1;
 
   // Filtreleme ve arama fonksiyonu
   const filteredApplications = applicationList.filter((app) => {
@@ -203,6 +207,12 @@ const ApplicationListPage = () => {
   ))}
 </tbody>
           </table>
+           {/* Pagination Bileşeni */}
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={(page) => setCurrentPage(page)}
+    />
         </div>
       )}
 

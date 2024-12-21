@@ -74,20 +74,24 @@ const useApplicationStore = () => {
   
   
   
-  const fetchApplications = async () => {
+  const fetchApplications = async (page = 1, limit = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get(`${apiUrl}/applications/applications`, {
-        withCredentials: true, // Kimlik doğrulama bilgilerini ekler
-      });
+      const response = await axiosInstance.get(
+        `${apiUrl}/applications/applications?page=${page}&limit=${limit}`,
+        {
+          withCredentials: true,
+        }
+      );
       setApplications(response.data);
-    }catch (err) {
+    } catch (err) {
       handleError(err, "Veriler alınırken bir hata oluştu!");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const fetchApplicationById = async (id) => {
     setLoading(true);
@@ -199,8 +203,6 @@ const useApplicationStore = () => {
       setLoading(false);
     }
   };
-  
-  
   
 
   return {

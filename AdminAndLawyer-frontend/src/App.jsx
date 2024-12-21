@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import AdminPanel from "./Layout/AdminPanel"; // Admin paneli
 import LawyerPanel from "./Layout/lawyerPanel"; // Lawyer paneli
 import ProtectedRoute from "./access-control/auth-controller"; // ProtectedRoute bileşenini import et
-
+import ResetPassword from "./pages/ResetPassword";
 const App = () => {
   return (
     <Router>
@@ -34,6 +34,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

@@ -8,6 +8,7 @@ const ThankYouPage = () => {
         style={{
           width: "90%",
           maxWidth: "500px",
+          marginBottom: "20%",
           border: "1px solid rgba(213, 196, 161, 0.5)",
           borderRadius: "12px",
           boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.3)",

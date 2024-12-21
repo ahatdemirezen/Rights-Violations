@@ -83,4 +83,24 @@ export const useAuthStore = create((set) => ({
       });
     }
   },
+
+   // Şifre sıfırlama isteği
+   forgotPassword: async (email) => {
+    try {
+      const response = await axios.post(`${apiUrl}/auth/forgot-password`, { email });
+      return response.data.message; // Başarı mesajını döndür
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Şifre sıfırlama isteği başarısız oldu.";
+      throw new Error(errorMessage);
+    }
+  },
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await axios.put(`${apiUrl}/auth/reset-password`, { token, newPassword });
+      return response.data.message; // Başarı mesajını döndür
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Şifre sıfırlama başarısız oldu.";
+      throw new Error(errorMessage);
+    }
+  },  
 }));

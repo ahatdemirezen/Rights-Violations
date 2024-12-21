@@ -138,7 +138,7 @@ const LawsuitList = () => {
                           onClick={() => openModal(lawsuit._id)}
                           className="bg-[#D9534F] text-white px-2 py-1 rounded shadow hover:bg-[#C9302C] transition duration-200 text-sm"
                         >
-                          Arşive Taşı
+                          Arşivle
                         </button>
                       </div>
                     </td>

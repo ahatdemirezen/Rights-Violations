@@ -93,8 +93,8 @@ const useLawsuitListForLawyerStore = create((set) => ({
       const formattedEvents = response.data.events.map((event) => ({
         ...event,
       
-        start: new Date(event.start), // Tarihi doğru formata çevir
-        end: new Date(event.end), // Tarihi doğru formata çevir
+        start: new Date(event.start.split("T")[0]), // Saat kısmını kaldır ve sadece tarihi kullan
+      end: new Date(event.end.split("T")[0]),   // Saat kısmını kaldır ve sadece tarihi kullan
       }));
   
       console.log("Formatlanmış eventler:", formattedEvents); // Formatlanmış verileri kontrol edin

@@ -16,7 +16,6 @@ const CalendarPage = () => {
 
   if (loading) return <p>Takvim verileri yükleniyor...</p>;
 
-  // Konsola verileri logla (veri kontrolü için)
   console.log("Frontend'deki takvim eventleri:", calendarEvents);
 
   // Event Görünümü Özelleştirme (Stil)
@@ -47,13 +46,13 @@ const CalendarPage = () => {
         startAccessor="start" // Etkinlik başlangıç tarihi
         endAccessor="end" // Etkinlik bitiş tarihi
         style={{ height: "80vh" }}
+        popup // "+more" popup özelliğini etkinleştir
+        popupOffset={{ x: 0, y: -150 }} // Popup'ı yukarı taşımak için ayarlandı
+        slotEventOverlap // Etkinliklerin hücre içinde çakışmasını önler
         eventPropGetter={eventPropGetter} // Stil özelleştirmesi
         components={{
-          event: customEventTitle, // Başlık özelleştirmesi
+          event: customEventTitle, // Özelleştirilmiş başlık
         }}
-        onSelectEvent={(event) =>
-          alert(`Başvuran: ${event.applicantName} - Başvuru No: ${event.applicationNumber}`)
-        }
         messages={{
           next: "Sonraki",
           previous: "Önceki",
@@ -63,6 +62,8 @@ const CalendarPage = () => {
           day: "Gün",
           agenda: "Ajanda",
         }}
+        views={["month", "week", "day"]}
+        max={2} // Ay görünümünde bir hücrede maksimum 2 etkinlik gösterir
       />
     </div>
   );

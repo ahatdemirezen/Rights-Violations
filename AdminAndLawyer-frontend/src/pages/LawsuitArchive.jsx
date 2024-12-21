@@ -106,7 +106,7 @@ const LawsuitList = () => {
                         to={`/admin/lawsuit/${lawsuit._id}`}
                         className="bg-[#123D3D] text-[#F8F1E8] px-3 py-1 rounded shadow hover:bg-[#D4AF37] hover:text-[#123D3D] transition"
                       >
-                        Detaylı Görüntüle
+                        Detay
                       </Link>
                     </div>
                   </td>

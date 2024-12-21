@@ -52,13 +52,13 @@ export const LoginControl = async (req: Request, res: Response, next: NextFuncti
 
     // Access token ve refresh token oluştur
    const accessToken = createAccessToken(user._id.toString(), user.name, user.roles);
-const refreshToken = createRefreshToken(user._id.toString(), user.name, user.roles);
+   const refreshToken = createRefreshToken(user._id.toString(), user.name, user.roles);
 
 
     // Access token'ı HTTP-Only cookie olarak ekle
     res.cookie("token", accessToken, {
       httpOnly: true,   // javascript saldırısı önlemek için kullanılmıştır document.Cookie().
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV == "production" ? true : false,
       maxAge: 15 * 60 * 1000, // 15 dakika
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",   // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
@@ -66,7 +66,7 @@ const refreshToken = createRefreshToken(user._id.toString(), user.name, user.rol
     // Refresh token'ı HTTP-Only cookie olarak ekle
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",  // HTTPS üzerinden gönderilmesi için
+      secure: process.env.NODE_ENV == "production" ? true : false,
       maxAge: 24 * 60 * 60 * 1000, // 1 gün
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
@@ -107,7 +107,7 @@ export const refreshAccessToken = async (
     // Yeni access token'ı HTTP-Only cookie olarak ekliyoruz
     res.cookie("token", newAccessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV == "production" ? true : false,
       maxAge: 15 * 60 * 1000, // 15 dakika
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",   // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
@@ -125,12 +125,12 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
     // Access token ve refresh token çerezlerini temizliyoruz
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV == "production" ? true : false,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV == "production" ? true : false,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 

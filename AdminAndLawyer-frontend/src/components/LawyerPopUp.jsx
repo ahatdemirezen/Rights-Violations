@@ -8,13 +8,14 @@ const LawyerForm = ({ isOpen, onClose }) => {
     name: "",
     password: "",
     gender: "male",
+    email: "",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await createLawyer(formData);
     onClose();
-    setFormData({ nationalID: "", name: "", password: "", gender: "male" });
+    setFormData({ nationalID: "", name: "", password: "", gender: "male", email:"" });
   };
 
   if (!isOpen) return null;
@@ -81,6 +82,31 @@ const LawyerForm = ({ isOpen, onClose }) => {
               placeholder="Ad ve Soyad"
               required
             />
+          </div>
+          
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-[#123D3D]"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="mt-1 block w-full p-2 border border-[#D5C4A1] rounded-md bg-[#F8F1E8] text-[#123D3D] focus:ring-[#D4AF37] focus:border-[#D4AF37]"
+              placeholder="Email"
+              required
+            />
+            {/* Email doğrulama */}
+            {!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(formData.email) && formData.email.length > 0 && (
+              <p className="text-red-500 text-sm mt-2">Geçerli bir email adresi girin.</p>
+            )}
           </div>
 
           {/* Şifre */}

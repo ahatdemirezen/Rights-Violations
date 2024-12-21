@@ -12,6 +12,7 @@ import lawsuitTrackingLawyerRoutes from "./routes/lawsuit-trackingForLawyer-rout
 import documentRoutes from "./routes/document-route"
 import citizenApplicationRoute from "./routes/citizen-route";
 import { authenticateAdmin } from "./middleware/admin-auth";
+import authRoutes from "./routes/auth-route";
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:5173" , process.env.WEB_URL || "http://localhost:5174"],
+    origin: [process.env.FRONTEND_URL || "https://rights-violations-t87a.vercel.app" , process.env.WEB_URL || "https://rights-violations-citizien.vercel.app" ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Credentials ile ilgili isteklere izin ver
@@ -45,6 +46,7 @@ app.use('/api/lawyerapplication', applicationForLawyerRoutes )
 app.use("/api/citizen/create", citizenApplicationRoute);
 app.use('/api/lawyer-lawsuits' , lawsuitTrackingLawyerRoutes)
 app.use('/api/documents' , authenticateAdmin , documentRoutes )
+app.use('/api/auth', authRoutes);
 
 // Hataları yakalayan middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

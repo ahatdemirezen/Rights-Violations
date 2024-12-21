@@ -20,7 +20,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "https://rights-violations-t87a.vercel.app" , process.env.WEB_URL || "https://rights-violations-citizien.vercel.app" ],
+    origin: [process.env.FRONTEND_URL || "https://rights-violations.vercel.app" , process.env.WEB_URL || "https://rights-violations-citizien.vercel.app" ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Credentials ile ilgili isteklere izin ver

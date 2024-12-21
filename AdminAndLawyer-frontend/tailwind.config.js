@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   content: [
     './index.html',  // Ana HTML dosyanız
     './src/**/*.{js,jsx,ts,tsx}',  // Tüm React bileşenlerinizi kapsar

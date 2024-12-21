@@ -11,7 +11,7 @@ const ApplicationSchema = new mongoose_1.Schema({
         type: String,
         required: false,
     },
-    nationalID: { type: String, required: false, unique: true, minlength: 11, maxlength: 11 }, //unique geçici olarak false yapılmıştır
+    nationalID: { type: String, required: false, unique: true, minlength: 11, maxlength: 11 }, //trycom
     applicationType: { type: String, enum: ["organization", "individual"], required: false },
     organizationName: {
         type: String,

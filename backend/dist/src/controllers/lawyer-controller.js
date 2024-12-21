@@ -17,9 +17,9 @@ const lawyer_service_1 = require("../services/lawyer-service");
 const mongoose_1 = __importDefault(require("mongoose"));
 const createUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, password, gender, nationalID } = req.body;
+        const { name, password, gender, nationalID, email } = req.body;
         // Service katmanını çağır ve kullanıcıyı oluştur
-        const user = yield (0, lawyer_service_1.createUserService)({ name, password, gender, nationalID });
+        const user = yield (0, lawyer_service_1.createUserService)({ name, password, gender, nationalID, email });
         res.status(201).json({
             message: 'User created successfully',
             user,

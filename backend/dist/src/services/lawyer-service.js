@@ -16,14 +16,19 @@ exports.getLawyerNameByUserIdService = exports.getLawyerByIdService = exports.de
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_model_1 = require("../models/user-model");
 const createUserService = (userData) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, password, gender, nationalID } = userData;
+    const { name, password, gender, nationalID, email } = userData;
     // Gerekli alanların kontrolü
-    if (!name || !password || !gender || !nationalID) {
+    if (!name || !password || !gender || !nationalID || !email) {
         throw new Error('All fields are required');
     }
     // TC kimlik numarasının geçerli uzunlukta olup olmadığını kontrol et
     if (nationalID.length !== 11 || isNaN(Number(nationalID))) {
         throw new Error('Invalid national ID');
+    }
+    // Email doğrulama
+    const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+    if (!emailRegex.test(email)) {
+        throw new Error('Invalid email format');
     }
     // Gender alanının sadece "male" veya "female" değerini kabul etmesi
     if (!Object.values(user_model_1.Gender).includes(gender)) {
@@ -39,6 +44,7 @@ const createUserService = (userData) => __awaiter(void 0, void 0, void 0, functi
         roles: [user_model_1.UserRole.Lawyer], // Rol otomatik olarak 'lawyer' olarak atanır
         gender, // Cinsiyet kullanıcıdan alınır
         nationalID, // TC kimlik numarası kullanıcıdan alınır
+        email, // Email kaydedilir
     });
     // Kullanıcıyı veritabanına kaydet
     const savedUser = yield newUser.save();
@@ -48,6 +54,7 @@ const createUserService = (userData) => __awaiter(void 0, void 0, void 0, functi
         roles: savedUser.roles,
         gender: savedUser.gender,
         nationalID: savedUser.nationalID,
+        email: savedUser.email,
     };
 });
 exports.createUserService = createUserService;
@@ -60,6 +67,7 @@ const getAllLawyersService = () => __awaiter(void 0, void 0, void 0, function* (
         name: lawyer.name,
         gender: lawyer.gender,
         nationalID: lawyer.nationalID,
+        email: lawyer.email,
         roles: lawyer.roles,
         createdAt: lawyer.createdAt,
         updatedAt: lawyer.updatedAt,
@@ -78,6 +86,7 @@ const deleteLawyerService = (id) => __awaiter(void 0, void 0, void 0, function* 
         gender: deletedLawyer.gender,
         nationalID: deletedLawyer.nationalID,
         roles: deletedLawyer.roles,
+        email: deletedLawyer.email,
     };
 });
 exports.deleteLawyerService = deleteLawyerService;
@@ -93,6 +102,7 @@ const getLawyerByIdService = (id) => __awaiter(void 0, void 0, void 0, function*
         gender: lawyer.gender,
         nationalID: lawyer.nationalID,
         roles: lawyer.roles,
+        email: lawyer.email,
         createdAt: lawyer.createdAt,
         updatedAt: lawyer.updatedAt,
     };

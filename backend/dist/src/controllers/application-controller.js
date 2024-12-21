@@ -50,13 +50,20 @@ const createApplication = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.createApplication = createApplication;
 const getAllApplications = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { documentType } = req.query;
-        const applications = yield (0, application_service_1.getAllApplicationsService)(documentType); // Service çağrısı
-        if (!applications.length) {
+        // Query parametrelerini al
+        const { documentType, page, limit } = req.query;
+        // Service çağrısı
+        const result = yield (0, application_service_1.getAllApplicationsService)({
+            documentType: documentType,
+            page: parseInt(page) || 1, // Varsayılan: 1. sayfa
+            limit: parseInt(limit) || 10, // Varsayılan: 10 öğe
+        });
+        if (!result.applications.length) {
             res.status(404).json({ message: "Hiç başvuru bulunamadı." });
             return;
         }
-        res.status(200).json({ applications });
+        // Başvuruları ve pagination bilgilerini döndür
+        res.status(200).json(result);
     }
     catch (error) {
         console.error("Hata:", error);

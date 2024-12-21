@@ -59,10 +59,11 @@ const lawsuit_trackingForLawyer_route_1 = __importDefault(require("./routes/laws
 const document_route_1 = __importDefault(require("./routes/document-route"));
 const citizen_route_1 = __importDefault(require("./routes/citizen-route"));
 const admin_auth_1 = require("./middleware/admin-auth");
+const auth_route_1 = __importDefault(require("./routes/auth-route"));
 dotenv.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: [process.env.FRONTEND_URL || "http://localhost:5173", process.env.WEB_URL || "http://localhost:5174"],
+    origin: [process.env.FRONTEND_URL || "https://rights-violations.vercel.app", process.env.WEB_URL || "https://rights-violations-citizien.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Credentials ile ilgili isteklere izin ver
@@ -83,6 +84,7 @@ app.use('/api/lawyerapplication', applicationForLawyer_route_1.default);
 app.use("/api/citizen/create", citizen_route_1.default);
 app.use('/api/lawyer-lawsuits', lawsuit_trackingForLawyer_route_1.default);
 app.use('/api/documents', admin_auth_1.authenticateAdmin, document_route_1.default);
+app.use('/api/auth', auth_route_1.default);
 // Hataları yakalayan middleware
 app.use((err, req, res, next) => {
     console.error(err.stack); // Hatanın detaylarını konsola yazdır

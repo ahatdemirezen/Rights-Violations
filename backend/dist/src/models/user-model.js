@@ -22,6 +22,12 @@ const UserSchema = new mongoose_1.Schema({
     },
     name: { type: String, required: true }, // User's full name, required
     password: { type: String, required: true }, // Password, required
+    email: {
+        type: String,
+        required: function () { return this.roles.includes(UserRole.Lawyer); }, // Only required for lawyers
+        unique: true,
+        match: [/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/, 'Please enter a valid email'],
+    },
     nationalID: { type: String, required: false, unique: true, minlength: 11, maxlength: 11 },
     gender: {
         type: String, // Gender field

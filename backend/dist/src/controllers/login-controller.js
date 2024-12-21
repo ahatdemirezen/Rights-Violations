@@ -94,14 +94,14 @@ const LoginControl = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         // Access token'ı HTTP-Only cookie olarak ekle
         res.cookie("token", accessToken, {
             httpOnly: true, // javascript saldırısı önlemek için kullanılmıştır document.Cookie().
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV == "production" ? true : false,
             maxAge: 15 * 60 * 1000, // 15 dakika
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
         });
         // Refresh token'ı HTTP-Only cookie olarak ekle
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // HTTPS üzerinden gönderilmesi için
+            secure: process.env.NODE_ENV == "production" ? true : false,
             maxAge: 24 * 60 * 60 * 1000, // 1 gün
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
         });
@@ -133,7 +133,7 @@ const refreshAccessToken = (req, res, next) => __awaiter(void 0, void 0, void 0,
         // Yeni access token'ı HTTP-Only cookie olarak ekliyoruz
         res.cookie("token", newAccessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV == "production" ? true : false,
             maxAge: 15 * 60 * 1000, // 15 dakika
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
         });
@@ -150,12 +150,12 @@ const logoutUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         // Access token ve refresh token çerezlerini temizliyoruz
         res.clearCookie("token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV == "production" ? true : false,
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         });
         res.clearCookie("refreshToken", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV == "production" ? true : false,
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         });
         res.status(200).json({ message: "Logout successful" });

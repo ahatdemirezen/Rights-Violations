@@ -160,25 +160,30 @@ exports.getLawsuitById = getLawsuitById;
 const getLawsuitsForCalendar = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId; // Middleware'den gelen userId alınır
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
         if (!userId) {
             res.status(400).json({ message: "User ID not found in request" });
+            return;
         }
         // Avukata ait davaları getir
         const lawsuits = yield (0, lawsuit_trackingForLawyer_service_1.getLawsuitsByLawyerService)(userId);
         // Takvim için gerekli bilgileri hazırlayın
         const calendarEvents = lawsuits.map((lawsuit) => {
             var _a, _b;
-            return ({
+            // Tarih formatından yalnızca tarihi al
+            const lawsuitDate = lawsuit.lawsuitDate
+                ? new Date(lawsuit.lawsuitDate.toISOString().split("T")[0]) // Saat kısmını kaldır
+                : new Date();
+            return {
                 id: lawsuit._id,
                 title: lawsuit.caseSubject || "Dava Konusu Yok",
-                start: lawsuit.lawsuitDate ? lawsuit.lawsuitDate.toISOString() : new Date(),
-                end: lawsuit.lawsuitDate ? lawsuit.lawsuitDate.toISOString() : new Date(),
+                start: lawsuitDate, // Başlangıç tarihi
+                end: lawsuitDate, // Bitiş tarihi (aynı tarih)
                 applicantName: ((_a = lawsuit.applicationId) === null || _a === void 0 ? void 0 : _a.applicantName) || "Başvuran Adı Yok",
                 applicationNumber: ((_b = lawsuit.applicationId) === null || _b === void 0 ? void 0 : _b.applicationNumber) || "Başvuru No Yok",
-            });
+            };
         });
-        console.log("Takvim Verileri:", calendarEvents);
+        console.log("Takvim Verileri (saat kaldırıldı):", calendarEvents);
         res.status(200).json({
             message: "Takvim verileri başarıyla alındı.",
             events: calendarEvents,

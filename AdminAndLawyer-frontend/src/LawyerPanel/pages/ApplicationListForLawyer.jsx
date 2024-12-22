@@ -72,8 +72,9 @@ const ApplicationList = () => {
                   <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-[#6D8B74] text-white">
                     <FaUser />
                   </div>
-                  <span className="truncate max-w-xs">{application.applicantName}</span>
+                  <span className="truncate max-w-xs">{application.applicantName || application.organizationName}</span>
                 </td>
+                
                 <td className="border border-[#D0C9C0] px-4 py-3">
                   {application.nationalID}
                 </td>

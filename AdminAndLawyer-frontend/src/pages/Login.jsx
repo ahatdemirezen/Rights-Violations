@@ -150,7 +150,7 @@ const forgotPassword = useAuthStore((state) => state.forgotPassword);
         Şifrenizi Sıfırlayın
       </h2>
       <p className="text-lg text-center text-[#C3A47E] mb-8">
-        Lütfen e-posta adresinizi girin. Şifre sıfırlama bağlantısını göndereceğiz.
+        Lütfen sistemimize kayıtlı avukat e-posta adresinizi girin. Şifre sıfırlama bağlantısını göndereceğiz.
       </p>
       <input
         type="email"

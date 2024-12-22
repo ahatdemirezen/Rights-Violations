@@ -1,19 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { FaFolder, FaFileAlt, FaLink } from "react-icons/fa"; // İkonlar
+import { FaFileAlt, FaLink } from "react-icons/fa"; // İkonlar
 import useDocumentStore from "../stores/DocumentStore";
 import SearchBar from "../components/SearchBar";
+import Pagination from "../components/paginationComponent";
 
 const DocumentList = () => {
-  const { documents, fetchDocuments, loading, error } = useDocumentStore();
+  const {
+    documents,
+    fetchDocuments,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    setPage,
+  } = useDocumentStore();
+
   const [filterType, setFilterType] = useState("");
   const [filterDocumentType, setFilterDocumentType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDocuments, setFilteredDocuments] = useState([]);
 
+  // İlk veri çekme
   useEffect(() => {
     fetchDocuments();
-  }, [fetchDocuments]);
+  }, [fetchDocuments, currentPage]);
 
+  // Filtreleme ve Arama
   useEffect(() => {
     let filtered = documents;
 
@@ -40,6 +52,11 @@ const DocumentList = () => {
 
     setFilteredDocuments(filtered);
   }, [filterType, filterDocumentType, searchTerm, documents]);
+
+  // Sayfa Değişimi
+  const handlePageChange = (page) => {
+    setPage(page);
+  };
 
   if (loading)
     return <p className="text-center text-[#123D3D]">Yükleniyor...</p>;
@@ -107,14 +124,12 @@ const DocumentList = () => {
 
             {/* Dosya Bilgileri */}
             <div className="text-center">
-              {/* Açıklama */}
               <h2 className="text-md font-semibold text-[#123D3D] mb-1">
                 Açıklama:{" "}
                 <span className="font-normal text-gray-700">
                   {document.documents[0]?.documentDescription || "Açıklama Yok"}
                 </span>
               </h2>
-              {/* Tür */}
               <p className="text-sm text-gray-600 mt-1">
                 Tür:{" "}
                 <span className="font-normal">
@@ -139,6 +154,13 @@ const DocumentList = () => {
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

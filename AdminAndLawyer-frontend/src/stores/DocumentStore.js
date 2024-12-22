@@ -1,24 +1,37 @@
 import { create } from "zustand";
 import axiosInstance from "../stores/axiosInstance";
 
-const apiUrl = import.meta.env.VITE_BE_URL; // .env dosyasından API URL'si alınır
+const apiUrl = import.meta.env.VITE_BE_URL;
 
-const useDocumentStore = create((set) => ({
-  documents: [], // Tüm dökümanları tutan state
-  loading: false, // Yüklenme durumu
-  error: null, // Hata durumu
+const useDocumentStore = create((set, get) => ({
+  documents: [],
+  loading: false,
+  error: null,
+  currentPage: 1,
+  totalPages: 1,
+  limit: 16,
 
-  // Tüm dökümanları getiren fonksiyon
+  setPage: (page) => set({ currentPage: page }),
+  setLimit: (limit) => set({ limit }),
+
   fetchDocuments: async () => {
-    set({ loading: true, error: null }); // Yüklenme durumunu başlat
+    const { currentPage, limit } = get();
+    set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.get(`${apiUrl}/documents`); // GET isteği
-      const documents = response.data.documents; // API'den dönen dökümanlar
-      set({ documents, loading: false }); // Dökümanları state'e kaydet ve yüklenme durumunu kapat
+      const response = await axiosInstance.get(`${apiUrl}/documents`, {
+        params: { page: currentPage, limit },
+      });
+      const { documents, pagination } = response.data;
+      set({
+        documents,
+        totalPages: pagination.totalPages,
+        currentPage: pagination.currentPage,
+        loading: false,
+      });
     } catch (error) {
       set({
-        error: error.response?.data?.message || "Dökümanlar alınırken bir hata oluştu.", // Hata mesajı
-        loading: false, // Yüklenme durumunu kapat
+        error: error.response?.data?.message || "Dökümanlar alınırken bir hata oluştu.",
+        loading: false,
       });
     }
   },

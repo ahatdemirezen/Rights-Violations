@@ -74,12 +74,12 @@ const useApplicationStore = () => {
   
   
   
-  const fetchApplications = async (page = 1, limit = 10) => {
+  const fetchApplications = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axiosInstance.get(
-        `${apiUrl}/applications/applications?page=${page}&limit=${limit}`,
+        `${apiUrl}/applications/applications`,
         {
           withCredentials: true,
         }

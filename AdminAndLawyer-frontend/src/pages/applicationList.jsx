@@ -4,7 +4,6 @@ import ApplicationEditModal from "../components/ApplicationPopUp"; // Mevcut det
 import CreateLawsuitModal from "../components/CreateLawsuitPopUp"; // Yeni pop-up bileşeni
 import SearchBar from "../components/SearchBar"; // SearchBar bileşenini ekledik
 import { useNavigate } from "react-router-dom";
-import Pagination from "../components/paginationComponent"; // Yeni Pagination bileşeni
 
 const ApplicationListPage = () => {
   const navigate = useNavigate();
@@ -21,15 +20,12 @@ const ApplicationListPage = () => {
   const [isLawsuitModalOpen, setIsLawsuitModalOpen] = useState(false); // Dava oluştur modal durumu
   const [filterStatus, setFilterStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // Arama terimi durumu
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetchApplications(currentPage, 10); // Sayfa başına 10 öğe varsayılan.
-  }, [currentPage]); // currentPage değiştiğinde fetchApplications çağrılır.
-  
+    fetchApplications();
+  }, []);
 
   const applicationList = applications.applications || [];
-  const totalPages = applications.totalPages || 1;
 
   // Filtreleme ve arama fonksiyonu
   const filteredApplications = applicationList.filter((app) => {
@@ -105,46 +101,54 @@ const ApplicationListPage = () => {
           placeholder="Başvuru Ara..."
         />
         <div className="flex space-x-4">
-          <button
-            onClick={() => setFilterStatus("")}
-            className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
-              filterStatus === ""
-                ? "bg-[#123D3D] text-[#D4AF37]"
-                : "bg-[#D5C4A1] text-[#123D3D]"
-            }`}
-          >
-            Tüm Başvurular
-          </button>
-          <button
-            onClick={() => setFilterStatus("approved")}
-            className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
-              filterStatus === "approved"
-                ? "bg-[#123D3D] text-[#D4AF37]"
-                : "bg-[#D5C4A1] text-[#123D3D]"
-            }`}
-          >
-            Onaylananlar
-          </button>
-          <button
-            onClick={() => setFilterStatus("pending")}
-            className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
-              filterStatus === "pending"
-                ? "bg-[#123D3D] text-[#D4AF37]"
-                : "bg-[#D5C4A1] text-[#123D3D]"
-            }`}
-          >
-            Bekleyenler
-          </button>
-          <button
-            onClick={() => setFilterStatus("rejected")}
-            className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
-              filterStatus === "rejected"
-                ? "bg-[#123D3D] text-[#D4AF37]"
-                : "bg-[#D5C4A1] text-[#123D3D]"
-            }`}
-          >
-            Reddedilenler
-          </button>
+        <button
+  onClick={() => {
+    setFilterStatus(""); 
+    setCurrentPage(1); // Her filtreleme yapıldığında sayfa başa alınır
+  }}
+  className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
+    filterStatus === "" ? "bg-[#123D3D] text-[#D4AF37]" : "bg-[#D5C4A1] text-[#123D3D]"
+  }`}
+>
+  Tüm Başvurular
+</button>
+
+<button
+  onClick={() => {
+    setFilterStatus("approved");
+    setCurrentPage(1);
+  }}
+  className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
+    filterStatus === "approved" ? "bg-[#123D3D] text-[#D4AF37]" : "bg-[#D5C4A1] text-[#123D3D]"
+  }`}
+>
+  Onaylananlar
+</button>
+
+<button
+  onClick={() => {
+    setFilterStatus("pending");
+    setCurrentPage(1);
+  }}
+  className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
+    filterStatus === "pending" ? "bg-[#123D3D] text-[#D4AF37]" : "bg-[#D5C4A1] text-[#123D3D]"
+  }`}
+>
+  Bekleyenler
+</button>
+
+<button
+  onClick={() => {
+    setFilterStatus("rejected");
+    setCurrentPage(1);
+  }}
+  className={`px-4 py-2 rounded shadow-md border border-[#D4AF37] transition duration-300 ${
+    filterStatus === "rejected" ? "bg-[#123D3D] text-[#D4AF37]" : "bg-[#D5C4A1] text-[#123D3D]"
+  }`}
+>
+  Reddedilenler
+</button>
+
         </div>
       </div>
 
@@ -207,12 +211,7 @@ const ApplicationListPage = () => {
   ))}
 </tbody>
           </table>
-           {/* Pagination Bileşeni */}
-    <Pagination
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onPageChange={(page) => setCurrentPage(page)}
-    />
+
         </div>
       )}
 

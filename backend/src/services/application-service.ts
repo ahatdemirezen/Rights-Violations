@@ -116,37 +116,17 @@ export const createApplicationService = async (applicationData: any, files: any)
 };
 
 
-export const getAllApplicationsService = async (query: any) => {
+export const getAllApplicationsService = async (documentType?: string) => {
   try {
-    // Sayfalama ve limit parametrelerini al
-    const page = parseInt(query.page) || 1; // Default olarak 1. sayfa
-    const limit = parseInt(query.limit) || 10; // Default olarak 10 öğe
-
-    // Başlangıç noktasını hesapla
-    const skip = (page - 1) * limit;
-
     // Belge türüne göre filtreleme
-    const documentFilter = query.documentType ? { "documents.type": query.documentType } : {};
+    const documentFilter = documentType ? { "documents.type": documentType } : {};
 
     // Başvuruları veritabanından çekme ve ilişkili verileri populate etme
     const applications = await ApplicationModel.find(documentFilter)
       .populate("eventCategories", "name")
-      .populate("documents")
-      .skip(skip) // Sayfalama için atlama
-      .limit(limit); // Sayfa başına öğe sayısı
+      .populate("documents");
 
-    // Toplam kayıt sayısını al
-    const totalApplications = await ApplicationModel.countDocuments(documentFilter);
-
-    // Toplam sayfa sayısını hesapla
-    const totalPages = Math.ceil(totalApplications / limit);
-
-    return {
-      applications, // Sayfa verileri
-      currentPage: page, // Geçerli sayfa
-      totalPages, // Toplam sayfa sayısı
-      totalApplications, // Toplam kayıt sayısı
-    };
+    return applications;
   } catch (error) {
     console.error("Başvurular getirilirken hata oluştu:", error);
     throw new Error("Başvurular getirilirken bir hata oluştu.");

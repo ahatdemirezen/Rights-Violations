@@ -6,6 +6,7 @@ import { FileModel } from "../models/files-model";
 import { uploadToS3} from "../controllers/S3-controller";
 import createHttpError from "http-errors";
 import { getLawsuitsByLawyerService , getLawsuitByIdService} from "../services/lawsuit-trackingForLawyer-service";
+import { loggerLawyer } from "../../utils/loggerForLawyer";
 
 export const getLawsuitsByLawyer = async (
   req: Request,
@@ -140,6 +141,23 @@ export const updateLawsuitWithFiles = async (
     await session.commitTransaction();
     session.endSession();
 
+   loggerLawyer.info(`Avukat (ID: ${userId} dava (ID: ${lawsuitId} güncellendi.` , {
+    lawyerId: userId,
+      lawsuitId,
+      updatedFields: {
+        caseSubject,
+        fileNumber,
+        court,
+        courtFileNo,
+        lawsuitDate,
+        caseNumber,
+        resultDescription,
+        resultStage,
+      },
+      uploadedFiles: newUploadedFiles.length,
+      status: "Success",
+   })
+
     // Yanıt döndür
     res.status(200).json({
       message: "Dava başarıyla güncellendi.",
@@ -151,6 +169,13 @@ export const updateLawsuitWithFiles = async (
     await session.abortTransaction();
     session.endSession();
 
+    loggerLawyer.error(`Avukat (ID: ${userId}) dava (ID: ${lawsuitId}) güncellerken hata oluştu.`, {
+      lawyerId: userId,
+      lawsuitId,
+      error: error instanceof Error ? error.message : String(error),
+      status: "Failed",
+    });
+    
     if (error instanceof Error) {
       return res.status(500).json({
         message: "Dava güncellenirken bir hata oluştu.",

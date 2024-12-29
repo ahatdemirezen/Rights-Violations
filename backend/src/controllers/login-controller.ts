@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import createHttpError from "http-errors";
 import * as dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/user-model"; // UserModel'i içe aktar
 import bcrypt from "bcryptjs"; // Şifre karşılaştırma için bcrypt kullanıyoruz
+import "../../utils/loggerForLogin"
+import { loggerForLogin } from "../../utils/loggerForLogin";
+import logger from "../../utils/logger";
 
 dotenv.config();
 
@@ -70,6 +72,8 @@ export const LoginControl = async (req: Request, res: Response, next: NextFuncti
       maxAge: 24 * 60 * 60 * 1000, // 1 gün
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF saldırılarını önlemek için başka tarayıcıdan gelen istekleri reddeder.
     });
+
+    loggerForLogin.info(`User ${user._id} logged in successfully`); // Başarılı giriş logu
 
     // Başarılı giriş mesajı
     res.status(200).json({

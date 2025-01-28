@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const apiUrl = import.meta.env.VITE_BE_URL;
-
+//removecaptcha
 const useApplicationStore = () => {
   const [applications, setApplications] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);

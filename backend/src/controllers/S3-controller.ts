@@ -2,7 +2,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
-
+//serverForRedeploy
 // AWS S3 istemcisi, kimlik bilgileri ve bölge bilgisiyle oluşturuluyor
 const s3 = new S3Client({
   region: process.env.AWS_REGION,

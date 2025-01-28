@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axiosInstance from "./axiosInstance";
 
 const apiUrl = import.meta.env.VITE_BE_URL; // API URL'sini .env dosyasından alın
-
+//serverForRedeploy
 // Zustand store
 const useApplicationListForLawyerStore = create((set) => ({
   applications: [], // Başvuruların listesi

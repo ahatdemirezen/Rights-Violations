@@ -5,6 +5,7 @@ import AdminPanel from "./Layout/AdminPanel"; // Admin paneli
 import LawyerPanel from "./Layout/lawyerPanel"; // Lawyer paneli
 import ProtectedRoute from "./access-control/auth-controller"; // ProtectedRoute bileşenini import et
 import ResetPassword from "./pages/ResetPassword";
+//tryserver
 const App = () => {
   return (
     <Router>
